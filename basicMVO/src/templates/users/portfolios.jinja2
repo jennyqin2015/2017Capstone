@@ -1,0 +1,16 @@
+{% extends "base.jinja2" %}
+{% block content %}
+    <div class="mt-3">
+        <h1>Portfolios <small class="h4 text-muted">showing existing portfolios</small></h1>
+    </div>
+    {% if portfolios%}
+        {% for portfolio in portfolios %}
+            <a href="{{ url_for('portfolios.get_portfolio_page', portfolio_id=portfolio._id) }}" class="list-group-item list-group-item-action">
+                <h4>Portfolio of {{ portfolio.user_email }} </h4>
+                Risk-Appetite: <strong>{{ portfolio.risk_appetite }}</strong><br/>
+            </a>
+        {% endfor %}
+    {% else %}
+        <a href="{{ url_for('portfolios.create_portfolio') }}" class="btn btn-success">Create Portfolio</a>
+    {% endif %}
+{% endblock %}

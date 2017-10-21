@@ -1,0 +1,19 @@
+{% extends "base.jinja2" %}
+{% block content %}
+    <div class="mt-3">
+        <h1>Stocks <small class="h4 text-muted">list of available stocks</small></h1>
+    </div>
+    <hr>
+    <div class="list-group">
+        {% for stock in stocks %}
+            <a href="{{ url_for('stocks.stock_page',stock_ticker = stock.ticker) }}" class="list-group-item list-group-item-action">
+                <h4>{{ stock.ticker }}</h4>
+                Expected Return: <strong>{{ stock.mu |round(5) }}</strong><br/>
+                Standard Deviation: <strong>{{ stock.std |round(5) }}</strong><br/>
+            </a>
+        {% endfor %}
+    </div>
+    {% if session['email'] in config.ADMINS %}
+        <a class="btn btn-success mt-3" href="{{ url_for('stocks.create_stock') }}" role="button">Create new</a>
+    {% endif %}
+{% endblock %}

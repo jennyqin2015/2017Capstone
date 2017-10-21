@@ -1,0 +1,20 @@
+{% extends "base.jinja2" %}
+{% block content %}
+    <div class="mt-3">
+        <h1>Edit Portfolio</h1>
+    </div>
+    <hr>
+    <div class="form-size">
+        <form method="post">
+            <div class="form-group">
+                <label for="risk_appetite">Risk Appetite:</label>
+                    <select class="form-control" id="risk_appetite" name="risk_appetite">
+                      <option>high</option>
+                      <option>medium</option>
+                      <option>low</option>
+                    </select>
+            </div>
+            <button type="submit" class="btn btn-secondary">Submit</button>
+        </form>
+    </div>
+{% endblock %}
