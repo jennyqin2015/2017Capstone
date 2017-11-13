@@ -1,10 +1,16 @@
-import base64
-from io import BytesIO
+from flask import Blueprint, request, session, redirect, url_for, render_template
 
+from src.models.users.user import User
+import src.models.users.errors as UserErrors
 import src.models.users.decorators as user_decorators
-from flask import Blueprint, request, session, render_template
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from src.common.database import Database
 from src.models.portfolios.portfolio import Portfolio
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from io import BytesIO
+import urllib
+import base64
+
 
 portfolio_blueprint = Blueprint('portfolios', __name__)
 

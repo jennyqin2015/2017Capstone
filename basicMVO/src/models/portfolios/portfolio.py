@@ -1,13 +1,8 @@
+import datetime
 import uuid
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import uuid
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-
 plt.style.use('ggplot')
 import cvxpy as cvx
 from src.common.database import Database

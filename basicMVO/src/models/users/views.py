@@ -1,7 +1,8 @@
-import src.models.users.decorators as user_decorators
-import src.models.users.errors as UserErrors
 from flask import Blueprint, request, session, redirect, url_for, render_template
+
 from src.models.users.user import User
+import src.models.users.errors as UserErrors
+import src.models.users.decorators as user_decorators
 
 user_blueprint = Blueprint('users', __name__)
 
