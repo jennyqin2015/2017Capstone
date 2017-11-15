@@ -14,8 +14,13 @@ from src.models.stocks.stock import Stock
 class Portfolio(object):
     # Portfolio class creates portfolio instances for user portfolios using stocks in Stock class
 
-    def __init__(self, user_email, risk_appetite, tickers = None, weights = None, _id=None):
+    def __init__(self, user_email, description, amount,initial_deposit, years, importance, risk_appetite, tickers = None, weights = None, _id=None):
         self.user_email = user_email
+        self.description = description
+        self.amount = amount
+        self.initial_deposit = initial_deposit
+        self.years = years
+        self.importance = importance
         self.risk_appetite = risk_appetite
         self.tickers = PortfolioConstants.TICKERS if tickers is None else tickers
         self.weights = weights
@@ -190,11 +195,16 @@ class Portfolio(object):
         return fig
 
     def save_to_mongo(self):
-        Database.update(PortfolioConstants.COLLECTION,{'_id':self._id},self.json())
+        Database.update(PortfolioConstants.COLLECTION,{'_id':self._id}, self.json())
 
     def json(self):     # Creates JSON representation of portfolio instance
         return{
             "_id" : self._id,
+            "description":self.description,
+            "amount": self.amount,
+            "initial_deposit": self.initial_deposit,
+            "years": self.years,
+            "importance": self.importance,
             "user_email" : self.user_email,
             "risk_appetite" : self.risk_appetite,
             "tickers" : self.tickers,

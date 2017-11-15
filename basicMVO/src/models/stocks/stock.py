@@ -1,11 +1,13 @@
 import uuid
+import pandas as pd
+import datetime
 from src.common.database import Database
 import src.models.stocks.constants as StockConstants
 import src.models.stocks.errors as StockErrors
 import quandl
 quandl.ApiConfig.api_key = StockConstants.API
-
-
+#http://finance.google.com/finance/historical?q=NYSEARCA:SPY&startdate=Jan+01%2C+2009&enddate=Aug+2%2C+2017&output=csv
+"http://finance.google.com/finance/historical?q=NYSEARCA:SPY&startdate=Jan+01%2C+2009&enddate="+"Nov+2%2C+2017"+"&output=csv"
 
 class Stock(object):
     def __init__(self, ticker, returns, mu, std, _id = None):
@@ -21,7 +23,7 @@ class Stock(object):
         return "<Asset: {}>".format(self.ticker)
 
     @classmethod
-    def get_Params(cls, ticker, start_date, end_date):
+    def get_Params(cls, ticker,):
         '''
         Gets ticker data from Quandl API and saves stock to database
 
@@ -34,9 +36,12 @@ class Stock(object):
         error = False
         try:
             # sets path to eleventh column (adjusted closing) of WIKI EOD table/ ticker
-            code = StockConstants.TABLE + ticker + '.11'
+            #code = StockConstants.TABLE + ticker + '.11'
             # retrieve data from Quandl API [start_date, end_date] aggregated monthly
-            data = quandl.get(code, start_date=start_date, end_date=end_date, collapse=StockConstants.COLLAPSE)
+            #data = quandl.get(code, start_date=start_date, end_date=end_date, collapse=StockConstants.COLLAPSE)
+            today = datetime.datetime.now()
+            url = "http://finance.google.com/finance/historical?q=NYSEARCA:SPY&startdate=Jan+01%2C+2009&enddate={0}+{1}%2C+{2}&output=csv".format(today.strftime("%b"), today.day, today.year)
+            data = pd.read_csv(url)
         except quandl.errors.quandl_error.NotFoundError:
             error = True
 
