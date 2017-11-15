@@ -41,7 +41,10 @@ def change_risk(portfolio_id):         # Views form to change portfolio's associ
         fig.savefig(img)
         img.seek(0)
         plot_data = base64.b64encode(img.read()).decode()
-        return render_template('/portfolios/optimal_portfolio.jinja2', portfolio = port, plot_url=plot_data)
+
+        return redirect(url_for(".get_portfolio_page", portfolio_id=port._id))
+
+        #return render_template('/portfolios/optimal_portfolio.jinja2', portfolio = port, plot_url=plot_data)
 
     return render_template('/portfolios/edit_portfolio.jinja2',portfolio = port)
 
@@ -50,7 +53,12 @@ def change_risk(portfolio_id):         # Views form to change portfolio's associ
 def create_portfolio():            # Views form to create portfolio associated with active/ loggedin user
     if request.method == "POST":
         risk_appetite = request.form['risk_appetite']
-        port = Portfolio(session['email'], risk_appetite= risk_appetite)
+        desc = request.form['goal_description']
+        amount = request.form['Amount_for_goal']
+        initial_deposit = request.form['initial_deposit']
+        years = request.form['years_to_achieve']
+        importance = request.form['importance']
+        port = Portfolio(session['email'], desc, amount, initial_deposit,years, importance, risk_appetite= risk_appetite)
         port.save_to_mongo()
         fig = port.runMVO()
         canvas = FigureCanvas(fig)
@@ -58,6 +66,15 @@ def create_portfolio():            # Views form to create portfolio associated w
         fig.savefig(img)
         img.seek(0)
         plot_data = base64.b64encode(img.read()).decode()
-        return render_template('/portfolios/optimal_portfolio.jinja2', portfolio=port, plot_url=plot_data)
+        return redirect(url_for(".get_portfolio_page", portfolio_id = port._id))
+        #return render_template('/portfolios/optimal_portfolio.jinja2', portfolio=port, plot_url=plot_data)
 
     return render_template('/portfolios/new_portfolio.jinja2')
+
+@portfolio_blueprint.route('/delete/<string:portfolio_id>')
+@user_decorators.requires_login
+def delete_portfolio(portfolio_id):            # Views form to create portfolio associated with active/ loggedin user
+    Database.remove("portfolios",{"_id":portfolio_id})
+    user = User.find_by_email(session['email'])
+    portfolios = user.get_portfolios()
+    return render_template('/users/portfolios.jinja2', portfolios = portfolios)

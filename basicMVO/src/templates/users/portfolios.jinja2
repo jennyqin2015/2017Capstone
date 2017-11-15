@@ -10,6 +10,7 @@
                 Risk-Appetite: <strong>{{ portfolio.risk_appetite }}</strong><br/>
             </a>
         {% endfor %}
+        <a href="{{ url_for('portfolios.create_portfolio') }}" class="btn btn-primary">Create New Portfolio</a>
     {% else %}
         <a href="{{ url_for('portfolios.create_portfolio') }}" class="btn btn-success">Create Portfolio</a>
     {% endif %}

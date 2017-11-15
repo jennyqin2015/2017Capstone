@@ -27,5 +27,18 @@
                 </div>
             </div>
         </div>
+        <div class= "row">
+
+
+
+            <div class="col">
+                <a class="btn btn-primary" href="{{ url_for('portfolios.delete_portfolio',portfolio_id = portfolio._id) }}">Delete this portfolio</a>
+            </div>
+            <div class ="col">
+                <a class="btn btn-primary" href="{{ url_for('users.user_portfolios') }}">Return to your portfolios</a>
+            </div>
+
+
+        </div>
     </div>
 {% endblock %}
