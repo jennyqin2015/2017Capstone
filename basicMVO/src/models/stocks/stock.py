@@ -36,12 +36,14 @@ class Stock(object):
         error = False
         try:
             # sets path to eleventh column (adjusted closing) of WIKI EOD table/ ticker
-            #code = StockConstants.TABLE + ticker + '.11'
+            code = StockConstants.TABLE + ticker + '.11'
             # retrieve data from Quandl API [start_date, end_date] aggregated monthly
-            #data = quandl.get(code, start_date=start_date, end_date=end_date, collapse=StockConstants.COLLAPSE)
+            data = quandl.get(code, start_date=start_date, end_date=end_date, collapse=StockConstants.COLLAPSE)
+            '''
             today = datetime.datetime.now()
             url = "http://finance.google.com/finance/historical?q=NYSEARCA:SPY&startdate=Jan+01%2C+2009&enddate={0}+{1}%2C+{2}&output=csv".format(today.strftime("%b"), today.day, today.year)
             data = pd.read_csv(url)
+            '''
         except quandl.errors.quandl_error.NotFoundError:
             error = True
 
