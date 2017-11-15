@@ -89,9 +89,21 @@ stock_r = stock_r.apply(lambda x: np.log(x) - np.log(x.shift(1)))
 
 ############################################################################################                
 class stochastic:
-    # calculate the optiaml weights and return the estimated wealth
-    def __init__(self,initial,year,stock,goal,r,q):
+    
+    def __init__(self,initial,year,stock,goal,r,q,index):
         
+        # Initial: A float, the initial wealth that an investor wants to invest in
+        # year: A float, the time needed to achieve the goal
+        # stock: A panda dataframe of assets price
+        # goal: A float, the number of wealth that an investor wants to achieve
+        # r: A float, reward surplus
+        # q: A float, storage penalty
+        # index: A list of lists of market index prices for each quarter of each year.
+        # example [ [1,2,3,4], [5,6,7,8] ]
+        
+        # year 1 market index prices are 1(quarter1),2(quarter2),3(quarter3),4(quarter4)
+        # year 2 market index prices are 5(quarter1),6(quarter2),7(quarter3),8(quarter4)
+    
         self.stock = stock
         self.goal = goal
         self.year = year
@@ -99,9 +111,14 @@ class stochastic:
         self.T = 4
         self.r = r
         self.q = q
-        pass
+        self.index = index
+
         
-    def split_goal(self):# rate a big goal into multiple small goals
+    def split_goal(self):
+        # split a big goal into multiple small goals achieved at the end of each year
+        
+        
+        
         lis =[]
         a = (self.goal/self.initial)**(1/self.year)
         for i in range(self.year):
@@ -113,7 +130,9 @@ class stochastic:
         
     def mean(self,stock):
     # stock is a data frame(maybe a dataseris) daily data
-    # return an array of stock return
+    # return an array(numpy array) of stock return
+        
+        
         mean = stock.mean()
         mean = mean*252 #annulized return
         mean = np.array(mean)
@@ -122,7 +141,8 @@ class stochastic:
 
     def vio(self,stock):
     #stock is a data frame(maybe a dataseris) daily data
-    #return an array of stock return
+    #return an array(numpy array) of stock return
+        
         cov = stock.cov()
         c = np.matrix((252**(1/2))*(cov)**(1/2))
         m,m = c.shape
@@ -136,7 +156,7 @@ class stochastic:
 
     def scen(self):
     # stock is a data frame(maybe a dataseries) daily data
-    #return an N*2 array. N is # of assets. and up and down total return.
+    # return an N*2 array. N is # of assets. 2 refers to up and down total return.
         m,N = self.stock.shape
         scen = np.zeros((N,3))
         r = self.mean(self.stock)
@@ -288,10 +308,11 @@ class stochastic:
         return [res,a]
     
     def fcs(self):
+        # return all optimal strategies
+        
         
         k_list = self.split_goal()
-        print(k_list)
-        #rint(k_list)
+        
         
         I0 = self.initial
         R = self.scen()
@@ -318,18 +339,10 @@ class stochastic:
           
      
         return res
-        
-        
-class present:
-    # shows the optimal strategy at each year and each period
-    def __init__(self,index,res):
-        
-        self.index = index
-        self.res = res
-        
+      
     def get_node(self):
         # get a list of index price
-        # return the optimal strategy
+        # return the optimal strategy index
         big_lis = self.index
         final_lis = []
         for j in range(len(big_lis)):
@@ -351,13 +364,19 @@ class present:
         return final_lis
     
     def strategy(self):
-        # return the optimal strategy
+        # return the optimal strategy which is a list
+        # the last element of the list is the estimated wealth achieved at the end of the investment period
+        # others are arrays containint the optimal strategy at each year
+        # example: [array(1),array(2),array(3),array(4), 1000]
+        # array(i) includes all the strategy at year i
+        # 1000 is the final wealth achieved 
         
-        expected = self.res[-1]
+        res = self.fcs()
+        expected = res[-1]
         
-        self.res.pop(-1)
+        res.pop(-1)
         
-        stra = self.res
+        stra = res
         
         optimal_index = self.get_node()
         
@@ -374,10 +393,23 @@ class present:
                 lis.append(op_stra[k])
                 
             liss.append(lis)
-                
+         
+        liss.append(expected)
                 
         return liss
                 
+ ############################################################################       
+a = stochastic(55,3,stock_r,80,3,1,[[0,1,2,1],[0,-1,2,3],[0,1,2,3]])
+#start = time.time()
+#c,k = a.func(rdr,XX,57,4,www,yyy,100,1,3)
+#print(a.mean(stock_r))
+##print(a.vio(stock_r))
+#print(a.scen())
+#end = time.time()
+
+a.strategy()  
         
+
+    
         
         
