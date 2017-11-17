@@ -309,13 +309,13 @@ class stochastic:
     
     def fcs(self):
         # return all optimal strategies
-        print(self.initial)
+        
         
         k_list = self.split_goal()
         
         
         I0 = self.initial
-        print(self.initial)
+       
         R = self.scen()
         T = self.T
         w = self.WW()
@@ -328,7 +328,7 @@ class stochastic:
     
         rar = np.array([])
         cur_I = I0
-        print(I0)
+       
         for i in range(len(k_list)):
             
             cur_K = k_list[i]
