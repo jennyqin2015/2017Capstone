@@ -186,7 +186,7 @@ class stochastic:
         m,N = self.stock.shape
         lis = []
         liss =[]
-        for j in range(2**T-1):
+        for j in range(2**self.T-1):
             for i in range(N):
                 lis.append(variable(1,'x'))
 
