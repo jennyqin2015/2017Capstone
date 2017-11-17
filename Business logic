@@ -112,18 +112,18 @@ class stochastic:
         self.r = r
         self.q = q
         self.index = index
-
+       
         
     def split_goal(self):
         # split a big goal into multiple small goals achieved at the end of each year
         
-        
-        
+       
+        I = self.initial
         lis =[]
-        a = (self.goal/self.initial)**(1/self.year)
+        a = (self.goal/I)**(1/self.year)
         for i in range(self.year):
-            self.initial*=a
-            lis.append(self.initial)
+            I*=a
+            lis.append(I)
         
         
         return lis
@@ -164,9 +164,9 @@ class stochastic:
         for i in range(N):
             for j in range(2):
                 if j % 2 == 0:
-                    scen[i,j] = exp(r[i]*(1/4)+sigma[i]*(1/4)**(1/2))
+                    scen[i,j] = exp(((r[i]**2)*((1/4)**2)+(sigma[i]**2)*(1/4))**(1/2))
                 if j % 2 == 1:
-                    scen[i,j] = exp(r[i]*(1/4)-sigma[i]*(1/4)**(1/2))
+                    scen[i,j] = exp(-((r[i]**2)*((1/4)**2)+(sigma[i]**2)*(1/4))**(1/2))
             scen[i,2] = exp(r[i]*(1/4))
         return scen
     
@@ -309,12 +309,13 @@ class stochastic:
     
     def fcs(self):
         # return all optimal strategies
-        
+        print(self.initial)
         
         k_list = self.split_goal()
         
         
         I0 = self.initial
+        print(self.initial)
         R = self.scen()
         T = self.T
         w = self.WW()
@@ -327,6 +328,7 @@ class stochastic:
     
         rar = np.array([])
         cur_I = I0
+        print(I0)
         for i in range(len(k_list)):
             
             cur_K = k_list[i]
@@ -366,9 +368,9 @@ class stochastic:
     def strategy(self):
         # return the optimal strategy which is a list
         # the last element of the list is the estimated wealth achieved at the end of the investment period
-        # others are arrays containint the optimal strategy at each year
-        # example: [array(1),array(2),array(3),array(4), 1000]
-        # array(i) includes all the strategy at year i
+        # others are lists of arrays containing the optimal strategy at each year
+        # example: [[array(1),array(2),array(3),array(4)],[array(1),array(2),array(3),array(4)],[array(1),array(2),array(3),array(4)],1000]
+        # array(i) includes all the strategy at each quarter(i)
         # 1000 is the final wealth achieved 
         
         res = self.fcs()
@@ -397,6 +399,8 @@ class stochastic:
         liss.append(expected)
                 
         return liss
+                
+        
                 
  ############################################################################       
 a = stochastic(55,3,stock_r,80,3,1,[[0,1,2,1],[0,-1,2,3],[0,1,2,3]])
