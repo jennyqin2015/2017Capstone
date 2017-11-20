@@ -1,0 +1,9 @@
+Ticker Name,url
+VTI,http://finance.google.com/finance/historical?q=NYSEARCA:VTI
+QQQ,http://finance.google.com/finance/historical?q=NASDAQ:QQQ
+IWM,http://finance.google.com/finance/historical?q=NYSEARCA:IWM
+FXI,http://finance.google.com/finance/historical?q=NYSEARCA:FXI
+VOO,http://finance.google.com/finance/historical?q=NYSEARCA:VOO
+SNP, https://query1.finance.yahoo.com/v7/finance/download/^GSPC
+
+

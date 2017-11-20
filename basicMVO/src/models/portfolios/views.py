@@ -33,7 +33,13 @@ def change_risk(portfolio_id):         # Views form to change portfolio's associ
     port = Portfolio.get_by_id(portfolio_id)
     if request.method == "POST":
         risk_appetite = request.form['risk_appetite']
+        port.description = request.form['goal_description']
+        port.amount = request.form['Amount_for_goal']
+        port.initial_deposit = request.form['initial_deposit']
+        port.years = request.form['years_to_achieve']
+        port.importance = request.form['importance']
         port.risk_appetite = risk_appetite
+
         port.save_to_mongo()
         fig = port.runMVO()
         canvas = FigureCanvas(fig)
@@ -46,7 +52,7 @@ def change_risk(portfolio_id):         # Views form to change portfolio's associ
 
         #return render_template('/portfolios/optimal_portfolio.jinja2', portfolio = port, plot_url=plot_data)
 
-    return render_template('/portfolios/edit_portfolio.jinja2',portfolio = port)
+    return render_template('/portfolios/edit_portfolio.jinja2')
 
 @portfolio_blueprint.route('/new', methods=['GET','POST'])
 @user_decorators.requires_login
@@ -78,3 +84,10 @@ def delete_portfolio(portfolio_id):            # Views form to create portfolio 
     user = User.find_by_email(session['email'])
     portfolios = user.get_portfolios()
     return render_template('/users/portfolios.jinja2', portfolios = portfolios)
+
+@portfolio_blueprint.route('/test/<string:portfolio_id>')
+@user_decorators.requires_login
+def test_portfolio(portfolio_id):            # Views form to create portfolio associated with active/ loggedin user
+    port = Portfolio.get_by_id(portfolio_id)
+    port.run_logic()
+    return render_template('/portfolios/weight_table.jinja2', portfolio= port)

@@ -8,20 +8,21 @@ import cvxpy as cvx
 from src.common.database import Database
 import src.models.portfolios.constants as PortfolioConstants
 from src.models.stocks.stock import Stock
-
-
-
+from src.models.logic.business_logic import stochastic
+import time
+import random
 class Portfolio(object):
     # Portfolio class creates portfolio instances for user portfolios using stocks in Stock class
 
-    def __init__(self, user_email, description, amount,initial_deposit, years, importance, risk_appetite, tickers = None, weights = None, _id=None):
+    def __init__(self, user_email, description, amount,initial_deposit, years, importance, risk_appetite, start_time = None, tickers = None, weights = None, _id=None):
         self.user_email = user_email
         self.description = description
-        self.amount = amount
+        self.amount = amount # target amount of money to achieve by the terminal date of this goal
         self.initial_deposit = initial_deposit
         self.years = years
         self.importance = importance
         self.risk_appetite = risk_appetite
+        self.start_time = time.time() if start_time is None else start_time # this stores the starting time of the user's portfolio in the format of seconds
         self.tickers = PortfolioConstants.TICKERS if tickers is None else tickers
         self.weights = weights
         self._id = uuid.uuid4().hex if _id is None else _id
@@ -30,7 +31,7 @@ class Portfolio(object):
         return "<Portfolio for user {}>".format(self.user_email)
 
 
-    def get_Params(self, start_date = PortfolioConstants.START_DATE, end_date = PortfolioConstants.END_DATE):
+    def get_Params(self):
         '''
         Checks MongoDB stocks collection to see if assets already exist. If not, runs Stock.get_Params to
         get asset return time series from Quandl. Once all time series are collected, computes vector of
@@ -44,15 +45,17 @@ class Portfolio(object):
         '''
 
         tickers = self.tickers.copy()
-
+        urls = PortfolioConstants.URLS
         n = len(tickers)
         rets = []
         mu = []
-        for ticker in tickers:
+        for i, ticker in enumerate(tickers):
             try:
-                stock = Stock.get_by_ticker(stock_ticker = ticker)    # Check if stock exists in db
+                stock = Stock.get_by_ticker(stock_ticker = ticker) # Check if stock exists in db
+                #if yes, update information in stock
+                #stock.update_data()
             except:                                                   # If not, get params from Quandl
-                stock = Stock.get_Params(ticker = ticker,start_date = start_date, end_date = end_date)
+                stock = Stock.get_Params(ticker = ticker, url = urls[i])
 
             rets.append(pd.read_json(stock.returns, orient='index'))
             mu.append(stock.mu)
@@ -64,7 +67,7 @@ class Portfolio(object):
 
         return mu, cov
 
-    def runMVO(self, start_date = PortfolioConstants.START_DATE, end_date = PortfolioConstants.END_DATE, samples = 100):
+    def runMVO(self, samples = 100):
         '''
         (A) Gets Portfolio characteristics (exp. return & cov. matrix)
         (B) Runs basic MVO for different risk aversion values (gamma)
@@ -82,7 +85,7 @@ class Portfolio(object):
 
         #        (A)        #
         #####################
-        mu, cov = self.get_Params(start_date, end_date)
+        mu, cov = self.get_Params()
         std = np.sqrt(np.diag(cov))
         n = len(mu)
 
@@ -182,6 +185,110 @@ class Portfolio(object):
 
         return fig
 
+    def get_one_year_index(self, start_year):
+        #this function creates the index
+        #since we retrieved financial data from 2012 to today
+        '''
+        imagine one user created his goal on the first day of 2014, and 2 years have past. Our model should be able to return the weight allocation
+        by the end of each season. Therefore, our model should provided 7 weight allocations by now (2017 Nov 18th).
+        '''
+        market_prices = []
+        market_index = Stock.get_by_ticker('SNP')
+        prices = pd.read_json(market_index.prices)
+        ''' this is for actual use of the model
+        start_date = self.start_time
+        '''
+        '''
+        set start_date to be the time
+        '''
+        str_time = '{0}-01-01'.format(start_year)
+        datetime_time = datetime.datetime.strptime(str_time, "%Y-%m-%d")
+        start_date = datetime_time.timestamp()
+        diff_in_seconds = datetime.timedelta(4*365/12).total_seconds()
+        # s1, s2, s3, s4 are the four timestamps for first, second, third quarters
+        s1 = start_date + diff_in_seconds
+        s2 = s1 + diff_in_seconds
+        s3 = s2 + diff_in_seconds
+        s4 = s3 + diff_in_seconds
+        time_stamps = [s1,s2,s3,s4]
+        for i in time_stamps:
+            time_key = datetime.datetime.fromtimestamp(i).strftime('%Y-%m-%d')
+            try:
+                market_price = prices.loc[time_key]
+                print(market_price)
+                market_prices.append(market_price)
+            except KeyError:
+                '''
+                random_num = 3
+                day = datetime.datetime.fromtimestamp(i).day + random_num
+                year = datetime.datetime.fromtimestamp(i).year
+                month = datetime.datetime.fromtimestamp(i).month
+                time_key = '{0}-{1}-{2}'.format(year,month,day)
+                market_price = prices.loc[time_key]
+                market_prices.append(market_price)
+                '''
+                date_list = random.sample(range(1, 27), 26)
+                for j in date_list:
+                    try:
+                        day = datetime.datetime.fromtimestamp(i).day + j
+                        year = datetime.datetime.fromtimestamp(i).year
+                        month = datetime.datetime.fromtimestamp(i).month
+                        time_key = '{0}-{1}-{2}'.format(year, month, day)
+                        market_price = prices.loc[time_key]
+                        market_prices.append(market_price)
+                    except KeyError:
+                        continue
+        #print(market_prices)
+        return market_prices # market_prices returns a list which contains 4 prices
+
+    '''
+    def compute_r_q(self):
+        if self.importance ==
+    '''
+
+
+    def get_market_index(self,start_year, diff_year):
+        market_index = []
+        for i in range(diff_year):
+            market_index.append(self.get_one_year_index(start_year))
+            start_year += 1
+        return market_index
+
+    def run_logic(self):
+        str_time = "2014-01-01"
+        datetime_time = datetime.datetime.strptime(str_time, "%Y-%m-%d")
+        start_year = datetime_time.year
+        diff_year = 2
+        market_index = self.get_market_index(start_year,diff_year)
+        tickers = self.tickers.copy()
+        urls = PortfolioConstants.URLS
+        rets = []
+
+        for i, ticker in enumerate(tickers):
+            if ticker != "SNP":
+                try:
+                    stock = Stock.get_by_ticker(stock_ticker=ticker)  # Check if stock exists in db
+                    # if yes, update information in stock
+                    stock.update_data()
+                except:  # If not, get params from Quandl
+                    stock = Stock.get_Params(ticker=ticker, url=urls[i])
+
+                rets.append(pd.read_json(stock.returns, orient='index'))
+                print(type(rets))
+                #prices = pd.concat(prices, axis=1)
+        rets = pd.concat(rets, axis=1)
+        print(rets)
+        #port_stochastic = stochastic(float(self.initial_deposit), int(self.years), rets, float(self.amount), 1, 3, market_index)
+        #print(port_stochastic.strategy())
+        #self.weights = port_stochastic
+        #self.save_to_mongo()
+
+        return
+
+
+
+
+
     def plot_portfolio(self):
         '''
         Plots pie chart of portfolio constituents
@@ -206,6 +313,7 @@ class Portfolio(object):
             "years": self.years,
             "importance": self.importance,
             "user_email" : self.user_email,
+            "start_time" : self.start_time,
             "risk_appetite" : self.risk_appetite,
             "tickers" : self.tickers,
             "weights": self.weights

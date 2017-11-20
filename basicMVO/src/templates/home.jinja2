@@ -1,10 +1,11 @@
 {% extends "base.jinja2" %}
 {% block content %}
     <div class="jumbotron">
-        <h1 class="display-3">Basic MVO</h1>
-        <p>Given a choice between three risk appetites, this application runs a simple Mean variance Optimization and
-            returns the optimal portfolio. Note: All portfolios contain the same 5 assets which can be found under
-            <strong>Stocks</strong> in the navigation bar above.</p>
+        <h1 class="display-3">SmartInvest</h1>
+        <br>
+        <p> Do you want to get rid of the pain of figuring out best way to invest your money? Join us today to
+            get smart financing advices from our automated financial advisor!
+            </p>
         <p>Just sign up, set your risk appetite, and we'll do the rest!</p>
         {% if session['email'] %}
             <p class="lead">
