@@ -392,7 +392,7 @@ class stochastic:
         
         liss = []
         #stra and optimal index should have same length
-        for i in range(len(stra)):
+        for i in range(len(optimal_index)):
             lis = []
             op_id = optimal_index[i]
             
@@ -407,7 +407,17 @@ class stochastic:
         liss.append(expected)
                 
         return liss
-                
+    
+    def weights(self):
+        lis = self.strategy()
+        lis.pop(-1)
+        nlis = lis
+        for i in range(len(nlis)):
+            for j in range(len(nlis[i])):
+                nlis[i][j] = nlis[i][j]/np.sum(nlis[i][j])
+
+        return nlis
+              
         
                 
  ############################################################################       
