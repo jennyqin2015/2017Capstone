@@ -25,6 +25,7 @@ class Portfolio(object):
         self.start_time = time.time() if start_time is None else start_time # this stores the starting time of the user's portfolio in the format of seconds
         self.tickers = PortfolioConstants.TICKERS if tickers is None else tickers
         self.weights = weights
+        #self.optimized_result = 0 if optimized_result is None else optimized_result
         self._id = uuid.uuid4().hex if _id is None else _id
 
     def __repr__(self):
@@ -193,8 +194,10 @@ class Portfolio(object):
         by the end of each season. Therefore, our model should provided 7 weight allocations by now (2017 Nov 18th).
         '''
         market_prices = []
-        market_index = Stock.get_by_ticker('SNP')
-        prices = pd.read_json(market_index.prices)
+        #market_index = Stock.get_by_ticker('SNP')
+        #prices = pd.read_json(market_index.prices)
+        data = pd.read_csv('common/SNP_Price.csv')
+        prices = pd.DataFrame(data.Close.values, index=data.Date, columns=['price'])
         ''' this is for actual use of the model
         start_date = self.start_time
         '''
@@ -210,13 +213,16 @@ class Portfolio(object):
         s2 = s1 + diff_in_seconds
         s3 = s2 + diff_in_seconds
         s4 = s3 + diff_in_seconds
-        time_stamps = [s1,s2,s3,s4]
+        time_stamps = [s1, s2, s3, s4]
         for i in time_stamps:
             time_key = datetime.datetime.fromtimestamp(i).strftime('%Y-%m-%d')
             try:
                 market_price = prices.loc[time_key]
+                print(prices.tail())
+
+                market_price = np.array(market_price)
                 print(market_price)
-                market_prices.append(market_price)
+                market_prices.append(market_price[0])
             except KeyError:
                 '''
                 random_num = 3
@@ -227,17 +233,24 @@ class Portfolio(object):
                 market_price = prices.loc[time_key]
                 market_prices.append(market_price)
                 '''
-                date_list = random.sample(range(1, 27), 26)
+                search_key = []
+                date_list = [x for x in range(26)]
                 for j in date_list:
-                    try:
                         day = datetime.datetime.fromtimestamp(i).day + j
                         year = datetime.datetime.fromtimestamp(i).year
                         month = datetime.datetime.fromtimestamp(i).month
-                        time_key = '{0}-{1}-{2}'.format(year, month, day)
-                        market_price = prices.loc[time_key]
-                        market_prices.append(market_price)
-                    except KeyError:
-                        continue
+                        time_key = '{:02d}-{:02d}-{:02d}'.format(year, month, day)
+                        search_key.append(time_key)
+
+
+                market_price = prices.loc[search_key]
+
+
+                market_price = np.array(market_price)
+                market_price = market_price[~np.isnan(market_price)]
+                #print(market_price)
+                market_prices.append(market_price[0])
+
         #print(market_prices)
         return market_prices # market_prices returns a list which contains 4 prices
 
@@ -250,8 +263,11 @@ class Portfolio(object):
     def get_market_index(self,start_year, diff_year):
         market_index = []
         for i in range(diff_year):
-            market_index.append(self.get_one_year_index(start_year))
-            start_year += 1
+            market_prices = self.get_one_year_index(start_year+i)
+            market_index.append(market_prices)
+        market_index = np.array(market_index)
+        market_index = market_index.reshape(market_index.size)
+        print(market_index.size)
         return market_index
 
     def run_logic(self):
@@ -259,29 +275,42 @@ class Portfolio(object):
         datetime_time = datetime.datetime.strptime(str_time, "%Y-%m-%d")
         start_year = datetime_time.year
         diff_year = 2
-        market_index = self.get_market_index(start_year,diff_year)
+        market_index = self.get_market_index(start_year, diff_year)
+        print(len(market_index))
         tickers = self.tickers.copy()
         urls = PortfolioConstants.URLS
         rets = []
 
         for i, ticker in enumerate(tickers):
-            if ticker != "SNP":
-                try:
-                    stock = Stock.get_by_ticker(stock_ticker=ticker)  # Check if stock exists in db
-                    # if yes, update information in stock
-                    stock.update_data()
-                except:  # If not, get params from Quandl
-                    stock = Stock.get_Params(ticker=ticker, url=urls[i])
 
-                rets.append(pd.read_json(stock.returns, orient='index'))
-                print(type(rets))
+            try:
+                stock = Stock.get_by_ticker(stock_ticker=ticker)  # Check if stock exists in db
+                # if yes, update information in stock
+            except:  # If not, get params from Quandl
+                stock = Stock.get_Params(ticker=ticker, url=urls[i])
+
+            rets.append(pd.read_json(stock.returns, orient='index'))
+            print(type(rets))
                 #prices = pd.concat(prices, axis=1)
         rets = pd.concat(rets, axis=1)
+        rets = rets.dropna()
         print(rets)
-        #port_stochastic = stochastic(float(self.initial_deposit), int(self.years), rets, float(self.amount), 1, 3, market_index)
+        #print(float(self.initial_deposit),int(self.years), float(self.amount), market_index)
+        port_stochastic = stochastic(float(self.initial_deposit), int(self.years), rets, float(self.amount), 3, 1, market_index)
         #print(port_stochastic.strategy())
-        #self.weights = port_stochastic
-        #self.save_to_mongo()
+
+        #print(strat)
+        #print("the weight is {0}, and the optimized result is {1}".format(weights, optimized_result))
+        weights = port_stochastic.weights()
+        weights = np.array(weights)
+        weights = weights.reshape(weights.size)
+        weights = weights.tolist()
+        #weights = [x.tolist() for x in weights]
+        print(weights)
+        self.weights = weights
+
+        #self.optimized_result = optimized_result
+        self.save_to_mongo()
 
         return
 
@@ -289,7 +318,7 @@ class Portfolio(object):
 
 
 
-    def plot_portfolio(self):
+    def plot_portfolio(self, weights):
         '''
         Plots pie chart of portfolio constituents
         :return: matplotlib matplotlib.figure.Figure object
@@ -297,12 +326,12 @@ class Portfolio(object):
 
         fig = plt.figure(figsize=(12, 6))
         ax = fig.add_subplot(111)
-        plt.pie(self.weights, labels=self.tickers, explode=[0.01]*len(self.weights), autopct='%1.1f%%')
+        plt.pie(weights, labels=self.tickers, explode=[0.01]*5, autopct='%1.1f%%')
 
         return fig
 
     def save_to_mongo(self):
-        Database.update(PortfolioConstants.COLLECTION,{'_id':self._id}, self.json())
+        Database.update(PortfolioConstants.COLLECTION, {'_id': self._id},self.json())
 
     def json(self):     # Creates JSON representation of portfolio instance
         return{
@@ -316,7 +345,8 @@ class Portfolio(object):
             "start_time" : self.start_time,
             "risk_appetite" : self.risk_appetite,
             "tickers" : self.tickers,
-            "weights": self.weights
+            "weights": self.weights,
+            #"optimized_result": self.optimized_result
         }
 
     @classmethod

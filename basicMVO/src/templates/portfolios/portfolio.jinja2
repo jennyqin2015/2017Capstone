@@ -30,7 +30,9 @@
 
         <div class="row">
             <div class="col">
-                <img src="data:image/png;base64, {{ plot_url }}" width="500" height="500" alt="graph">
+                {% for i in plot_url_list %}
+                      <img src="data:image/png;base64, {{ i }}" width="500" height="500" alt="graph">
+                {% endfor %}
             </div>
 
             <div class="col align-self-center">

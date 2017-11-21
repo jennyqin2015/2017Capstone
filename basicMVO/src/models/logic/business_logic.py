@@ -333,7 +333,7 @@ class stochastic(object):
 
     def c_array(self):
         a = self.index
-        a = a.tolist()
+        #a = a.tolist()
 
         return [a[i:i + 4] for i in range(0, len(a), 4)]
 
@@ -363,6 +363,8 @@ class stochastic(object):
         return final_lis
 
 
+
+
     def strategy(self):
         # return the optimal strategy which is a list
         # the last element of the list is the estimated wealth achieved at the end of the investment period
@@ -381,9 +383,8 @@ class stochastic(object):
         optimal_index = self.get_node()
 
         liss = []
-        print("this is running")
         # stra and optimal index should have same length
-        for i in range(len(stra)):
+        for i in range(len(optimal_index)):
             lis = []
             op_id = optimal_index[i]
 
@@ -392,14 +393,23 @@ class stochastic(object):
             for j in range(len(op_id)):
                 k = op_id[j]
                 lis.append(op_stra[k])
-            print("this is running")
+
             liss.append(lis)
 
-        liss.append(expected)
+
 
         return liss
 
+    def weights(self):
+        lis = self.strategy()
+        optimal_solution = lis[-1]
+        lis.pop(-1)
+        nlis = lis
+        for i in range(len(nlis)):
+            for j in range(len(nlis[i])):
+                nlis[i][j] = nlis[i][j] / np.sum(nlis[i][j])
 
+        return nlis
 
     ############################################################################
 

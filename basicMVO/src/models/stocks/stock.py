@@ -46,22 +46,13 @@ class Stock(object):
             # retrieve data from Quandl API [start_date, end_date] aggregated monthly
             #data = quandl.get(code, start_date=start_date, end_date=end_date, collapse=StockConstants.COLLAPSE)
             #Please be noted that the link to retrieve S&P index data is different from the links to retrieve the price for other assets
-            if ticker != "SNP":
-                today = datetime.datetime.now()
-                url = "{0}&startdate=Jan+01%2C+2012&enddate={1}+{2}%2C+{3}&output=csv".format(url, today.strftime("%b"), today.day, today.year)
-                data = pd.read_csv(url)
-                data.Date = pd.to_datetime(data.Date)
-                data = pd.DataFrame(data.Close.values, index = data.Date, columns = ['price'])
-            else:
-                '''
-                end_date = int(time.time())
-                url = "{0}?period1=1325394000&period2={1}&interval=1d&events=history&crumb=XUiHcJcHecA".format(url, end_date)
-                data = pd.read_csv(url)
-                data.Date = pd.to_datetime(data.Date)
-                '''
 
-                data = pd.read_csv('common/SNP_Price.csv')
-                data = pd.DataFrame(data.Close.values, index=data.Date, columns=['price'])
+            today = datetime.datetime.now()
+            url = "{0}&startdate=Jan+01%2C+2012&enddate={1}+{2}%2C+{3}&output=csv".format(url, today.strftime("%b"), today.day, today.year)
+            data = pd.read_csv(url)
+            data.Date = pd.to_datetime(data.Date)
+            data = pd.DataFrame(data.Close.values, index = data.Date, columns = ['price'])
+
         except quandl.errors.quandl_error.NotFoundError:
             error = True
 
@@ -123,7 +114,8 @@ class Stock(object):
         #pd.to_datetime(prices.index),
         return fig
     def save_to_mongo(self):
-        Database.update(StockConstants.COLLECTION,{'_id':self._id},self.json())
+        Database.update(StockConstants.COLLECTION, {'_id': self._id}, self.json())
+
 
     def json(self):     # Creates JSON representation of stock instance
         return{

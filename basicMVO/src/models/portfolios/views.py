@@ -10,7 +10,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from io import BytesIO
 import urllib
 import base64
-
+import numpy as np
 
 portfolio_blueprint = Blueprint('portfolios', __name__)
 
@@ -18,14 +18,22 @@ portfolio_blueprint = Blueprint('portfolios', __name__)
 @user_decorators.requires_login
 def get_portfolio_page(portfolio_id):   # Renders unique portfolio page
     port = Portfolio.get_by_id(portfolio_id)
-    fig = port.plot_portfolio()
-    canvas = FigureCanvas(fig)
-    img = BytesIO()
-    fig.savefig(img)
-    img.seek(0)
-    plot_data = base64.b64encode(img.read()).decode()
+    weights = port.weights
+    plot_data_list = []
+    start_ls = np.arange(0,len(weights),5)
+    print(start_ls)
 
-    return render_template('/portfolios/portfolio.jinja2', portfolio = port, plot_url=plot_data)
+    for i in start_ls:
+        weights_i = weights[i:i+5]
+        fig = port.plot_portfolio(weights_i)
+        canvas = FigureCanvas(fig)
+        img = BytesIO()
+        fig.savefig(img)
+        img.seek(0)
+        plot_data = base64.b64encode(img.read()).decode()
+        plot_data_list.append(plot_data)
+
+    return render_template('/portfolios/portfolio.jinja2', portfolio = port, plot_url_list=plot_data_list)
 
 @portfolio_blueprint.route('/edit/<string:portfolio_id>', methods=['GET','POST'])
 @user_decorators.requires_login
@@ -65,13 +73,19 @@ def create_portfolio():            # Views form to create portfolio associated w
         years = request.form['years_to_achieve']
         importance = request.form['importance']
         port = Portfolio(session['email'], desc, amount, initial_deposit,years, importance, risk_appetite= risk_appetite)
-        port.save_to_mongo()
+        #port.get_Params()
+        #description, amount, initial_deposit, years, importance, risk_appetite
+        port.run_logic()
+        #print(port.weights)
+
+        '''
         fig = port.runMVO()
         canvas = FigureCanvas(fig)
         img = BytesIO()
         fig.savefig(img)
         img.seek(0)
         plot_data = base64.b64encode(img.read()).decode()
+        '''
         return redirect(url_for(".get_portfolio_page", portfolio_id = port._id))
         #return render_template('/portfolios/optimal_portfolio.jinja2', portfolio=port, plot_url=plot_data)
 
