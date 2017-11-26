@@ -90,7 +90,7 @@ stock_r = stock_r.apply(lambda x: np.log(x) - np.log(x.shift(1)))
 ############################################################################################                
 class stochastic:
     
-    def __init__(self,initial,year,stock,goal,r,q,index):
+    def __init__(self,initial,year,stock,goal,r,q,index,Inj):
         
         # Initial: A float, the initial wealth that an investor wants to invest in
         # year: A float, the time needed to achieve the goal
@@ -112,7 +112,7 @@ class stochastic:
         self.r = r
         self.q = q
         self.index = index
-       
+        self.Inj = Inj
         
     def split_goal(self):
         # split a big goal into multiple small goals achieved at the end of each year
@@ -225,7 +225,7 @@ class stochastic:
                 
                 
 
-    def constriant2(self,R,X,I,T,w,Y,G): #R return for each asset n*2 matrix # X each asset at each period ,#G, T each period
+    def constriant2(self,R,X,I,T,w,Y,G,Inj): #R return for each asset n*2 matrix # X each asset at each period ,#G, T each period
     # w 
     # y
     
@@ -240,7 +240,7 @@ class stochastic:
 
         #a = np.sum(np.array(X[0][0]))
 
-        cons.append(a == I)
+        cons.append(a == I+Inj)
         a = 0
         b = 0
         c = 0
@@ -262,12 +262,13 @@ class stochastic:
 
 
                 a += X[j][i]*float(np.exp(ss[0]))#np.random.uniform(R[i,2],R[i,0])
+                print(np.exp(ss[0]))
                 #a += X[0][s][i]*float(R[i,0])
                 b += X[2*j+1][i]
                 for lll in range(10000):
                     if R[i,0]>0.01:
                         kk = np.random.normal(R[i,0], R[i,1], 1)
-                        if R[i,0]-1.3*R[i,1]<kk[0] < 0.0025:
+                        if  kk[0] < 0.0025:
                             break
                         else:
                             continue
@@ -278,8 +279,8 @@ class stochastic:
                 d += X[2*j+2][i]
                 cons.append(X[j][i]>=0)
 
-            cons.append(a == b) 
-            cons.append(c == d)
+            cons.append(a + Inj == b) 
+            cons.append(c + Inj == d)
 
             a = 0
             b = 0
@@ -302,25 +303,25 @@ class stochastic:
                             continue
                     else:
                          ss = np.random.normal(R[i,0], R[i,1], 1)
-                print(np.exp(ss[0]))      
                
                 a += X[j][i]* float(np.exp(ss[0])) # np.random.uniform(R[i,2],R[i,0])
+                
                 for lll in range(10000):
                     if R[i,0]>0.01:
                         kk = np.random.normal(R[i,0], R[i,1], 1)
-                        if R[i,0]-1.3*R[i,1]<kk[0] < 0.0025:
+                        if kk[0] < 0.0025:
                             break
                         else:
                             continue
                     else:
                         kk = np.random.normal(R[i,0], R[i,1], 1)
                         
-                print(np.exp(kk[0]))
+              
                 c += X[j][i]* float(np.exp(kk[0]))#np.random.uniform(R[i,1],R[i,2])
-
+             
                 cons.append(X[j][i]>=0)
 
-
+            
 
             a += (-Y[k]+w[k])
             c += (-Y[l]+w[l])
@@ -350,14 +351,14 @@ class stochastic:
 
         return c  
 
-    def func(self,R,X,I,T,w,Y,G,q,r):
+    def func(self,R,X,I,T,w,Y,G,q,r,Inj):
         N,m = R.shape
-        step = 13
+        step = 25
         res = np.zeros((2**T-1,N))
         kk = np.zeros((2**T-1,N))
         a = 0
         for i in range(step):
-            cons = self.constriant2(R,X,I,T,w,Y,G)
+            cons = self.constriant2(R,X,I,T,w,Y,G,Inj)
             bbb = self.objective(w,Y,q,r,T)
             lp2 = op(bbb, cons)
             lp2.solve()
@@ -378,15 +379,9 @@ class stochastic:
     
     def fcs(self):
         # return all optimal strategies
-        
-        
         k_list = self.split_goal()
-        
-        
-        I0 = self.initial
-       
+        I0 = self.initial - self.Inj
         R = self.norm()
-    
         T = self.T
         w = self.WW()
         Y = self.YY()
@@ -395,21 +390,14 @@ class stochastic:
         r = self.r
         m,N = R.shape
         res = []
-    
         rar = np.array([])
         cur_I = I0
-       
         for i in range(len(k_list)):
-            
             cur_K = k_list[i]
-            cur_S, cur_I = self.func(R, X, int(cur_I), T, w, Y, cur_K, q, r)
-            
-            
+            cur_S, cur_I = self.func(R, X, int(cur_I), T, w, Y, cur_K, q, r,self.Inj)
             res.append(cur_S)
             if i == len(k_list) - 1:
                 res.append(cur_I)
-          
-     
         return res
     def c_array(self):
         a = self.index
@@ -466,15 +454,11 @@ class stochastic:
         for i in range(a):
             lis = []
             op_id = optimal_index[i]
-            
             op_stra = stra[i]
-            
             for j in range(len(op_id)):
                 k = op_id[j]
                 lis.append(op_stra[k])
-                
             liss.append(lis)
-         
         liss.append(expected)
                 
         return liss
@@ -489,8 +473,6 @@ class stochastic:
                 nlis[i][j] = nlis[i][j]/np.sum(nlis[i][j])
 
         return nlis
-      
-                
         
                 
  ############################################################################       
