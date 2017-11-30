@@ -9,9 +9,11 @@ from src.models.portfolios.portfolio import Portfolio
 
 
 class User(object):
-    def __init__(self, email, password, _id = None):
+    def __init__(self, email, password, first_name, last_name, _id = None):
         self.email = email
         self.password = password
+        self.first_name = first_name
+        self.last_name = last_name
         self._id = uuid.uuid4().hex if _id is None else _id
 
     def __repr__(self):
@@ -40,7 +42,7 @@ class User(object):
         return True
 
     @staticmethod
-    def register_user(email, password):
+    def register_user(email, password, first_name, last_name):
         '''
         Registers a user using an email & password. Password already comes hashed as sha-512.
 
@@ -57,7 +59,7 @@ class User(object):
         if not Utils.email_is_valid(email):
             raise UserErrors.InvalidEmailError("Invalid email format!")
 
-        User(email, Utils.hash_password(password)).save_to_mongo()
+        User(email, Utils.hash_password(password), first_name, last_name).save_to_mongo()
         return True
 
     def save_to_mongo(self):
@@ -67,7 +69,9 @@ class User(object):
         return {
             "_id": self._id,
             "email": self.email,
-            "password": self.password
+            "password": self.password,
+            "first_name": self.first_name,
+            "last_name": self.last_name
         }
 
     @classmethod

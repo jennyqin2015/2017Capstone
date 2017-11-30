@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Smart invest</title>
+	{% include "html_dependencies.html" %}
+</head>
+<body>
+	<div class="topNav">
+		<div class="logo">
+			Smart Invest
+		</div>
+		<div class="buttons">
+			<a href="" class="button is-white">
+				<span class="icon">
+  				<i class="fa fa-envelope"></i>
+				</span>
+			</a>
+			<a href="" class="button is-white">
+				<span class="icon">
+  				<i class="fa fa-bell"></i>
+				</span>
+			</a>
+			<a href="" class="button is-white">
+				<span class="icon">
+  				<i class="fa fa-user"></i>
+				</span>
+			</a>
+		</div>
+	</div>
+	<div class="body">
+		<div class="shadowLayer"></div>
+		<div class="centerBox">
+			<p class="title is-1 is-spaced" style="font-size: 60px;">Smart Invest</p>
+			<p class="subtitle is-4 is-spaced">Invest now, harvest in future!</p>
+			<hr style="height: 2px; margin-top: 10px;" />
+			<div class="centerButtons">
+				<a class="button" href={{ url_for('users.register_user') }}>
+			    <span class="icon">
+			      <i class="fa fa-pie-chart"></i>
+			    </span>
+			    <span>Join Us</span>
+			  </a>
+			  <a class="button" href="{{ url_for('users.login_user') }}">
+			    <span class="icon">
+			      <i class="fa fa-key"></i>
+			    </span>
+			    <span>Log in</span>
+			  </a>
+			  <!--
+			 	<a class="button">
+			    <span class="icon">
+			      <i class="fa fa-github"></i>
+			    </span>
+			    <span>GitHub</span>
+			  </a>
+			  -->
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -26,8 +26,10 @@ def register_user():   # Views form required for user signup
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
         try:
-            if User.register_user(email,password):
+            if User.register_user(email,password, first_name, last_name):
                 session['email'] = email
                 return redirect(url_for(".user_portfolios"))
         except UserErrors.UserError as e:
@@ -47,3 +49,9 @@ def user_portfolios():  # Views list of user portfolios
     portfolios = user.get_portfolios()
 
     return render_template('/users/portfolios.jinja2', portfolios = portfolios)
+
+@user_blueprint.route('/profile')
+@user_decorators.requires_login
+def user_profile():  # Views list of user portfolios
+    user = User.find_by_email(session['email'])
+    return render_template('/users/profile_page.jinja2', user = user)

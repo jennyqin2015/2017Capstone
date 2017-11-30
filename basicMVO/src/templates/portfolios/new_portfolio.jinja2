@@ -1,5 +1,7 @@
 {% extends "base.jinja2" %}
+
 {% block content %}
+
     <div class="mt-3">
         <h1>Thanks for creating your portfolio with us!</h1>
     </div>
@@ -71,6 +73,12 @@
                           </label>
                         </div>
                         <div class="form-check">
+                          <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios1" value="Highly Important" checked>
+                            Highly important, I have to achieve this goal before or on the targeted end date.
+                          </label>
+                        </div>
+                        <div class="form-check">
                         <label class="form-check-label">
                             <input type="radio" class="form-check-input" name="importance" id="optionsRadios2" value="Important">
                             This goal is important to me, but I can accept the delay of achieving this goal if there are other investment opportunities with higher return.
@@ -84,7 +92,10 @@
                     </div>
             </fieldset>
 
-
+              <div class="form-group">
+                  <label for="start_time">Please input the start time for this portfolio:</label>
+                  <textarea class="form-control" rows="5" id="start_time" name="start_time" placeholder="Ex: 2014-01-01"></textarea>
+              </div>
             <button type="submit" class="btn btn-success">Create</button>
         </form>
     </div>

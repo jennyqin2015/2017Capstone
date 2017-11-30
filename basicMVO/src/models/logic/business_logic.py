@@ -90,17 +90,17 @@ stock_r = stock_r.apply(lambda x: np.log(x) - np.log(x.shift(1)))
 '''
 
 ############################################################################################
-class stochastic(object):
-    def __init__(self, initial, year, stock, goal, r, q, index):
+class stochastic:
+    def __init__(self, initial, year, stock, goal, r, q, index, Inj):
 
         # Initial: A float, the initial wealth that an investor wants to invest in
         # year: A float, the time needed to achieve the goal
-        # stock: A panda dataframe of assets price
+        # stock: A panda dataframe of assets return
         # goal: A float, the number of wealth that an investor wants to achieve
         # r: A float, reward surplus
         # q: A float, storage penalty
-        # index: A list of lists of market index prices for each quarter of each year.
-        # example [ [1,2,3,4], [5,6,7,8] ]
+        # index: An array of market index prices for each quarter of each year.
+        # example [ [1,2,3,4,5,6] ]
 
         # year 1 market index prices are 1(quarter1),2(quarter2),3(quarter3),4(quarter4)
         # year 2 market index prices are 5(quarter1),6(quarter2),7(quarter3),8(quarter4)
@@ -113,6 +113,7 @@ class stochastic(object):
         self.r = r
         self.q = q
         self.index = index
+        self.Inj = Inj
 
     def split_goal(self):
         # split a big goal into multiple small goals achieved at the end of each year
@@ -121,28 +122,29 @@ class stochastic(object):
         I = self.initial
         lis = []
         a = (self.goal / I) ** (1 / self.year)
+
         for i in range(self.year):
             I *= a
             lis.append(I)
 
         return lis
 
-    def mean(self, stock):
+    def mean(self):
         # stock is a data frame(maybe a dataseris) daily data
         # return an array(numpy array) of stock return
-        #stock is not price but return
 
-        mean = stock.mean()
+
+        mean = self.stock.mean()
         mean = mean * 252  # annulized return
         mean = np.array(mean)
 
         return mean
 
-    def vio(self, stock):
+    def vio(self):
         # stock is a data frame(maybe a dataseris) daily data
         # return an array(numpy array) of stock return
 
-        cov = stock.cov()
+        cov = self.stock.cov()
         c = np.matrix((252 ** (1 / 2)) * (cov) ** (1 / 2))
         m, m = c.shape
         lis = []
@@ -153,20 +155,32 @@ class stochastic(object):
 
         return vio
 
+    def var(self):
+        cov = self.stock.cov()
+        c = np.matrix(252 * (cov))
+        m, m = c.shape
+        lis = []
+        for i in range(m):
+            lis.append(c[i, i])
+
+        var = np.array(lis)
+
+        return var
+
     def scen(self):
         # stock is a data frame(maybe a dataseries) daily data
         # return an N*2 array. N is # of assets. 2 refers to up and down total return.
         m, N = self.stock.shape
         scen = np.zeros((N, 3))
-        r = self.mean(self.stock)
-        sigma = self.vio(self.stock)
+        r = self.mean()
+        sigma = self.vio()
         for i in range(N):
             for j in range(2):
                 if j % 2 == 0:
                     scen[i, j] = np.exp(((r[i] ** 2) * ((1 / 4) ** 2) + (sigma[i] ** 2) * (1 / 4)) ** (1 / 2))
                 if j % 2 == 1:
                     scen[i, j] = np.exp(-((r[i] ** 2) * ((1 / 4) ** 2) + (sigma[i] ** 2) * (1 / 4)) ** (1 / 2))
-            scen[i, 2] = np.exp(r[i] * (1 / 4))
+            scen[i, 2] = exp(r[i] * (1 / 4))
         return scen
 
     def WW(self):
@@ -194,8 +208,23 @@ class stochastic(object):
 
         return liss
 
-    def constriant2(self, R, X, I, T, w, Y,
-                    G):  # R return for each asset n*2 matrix # X each asset at each period ,#G, T each period
+    def norm(self):
+        m, N = self.stock.shape
+
+        scen = np.zeros((N, 2))
+        r = self.mean()
+        sigma = self.vio()
+        for i in range(N):
+            for j in range(2):
+                if j % 2 == 0:
+                    scen[i, j] = r[i] / 4
+                if j % 2 == 1:
+                    scen[i, j] = sigma[i] / 2
+
+        return scen
+
+    def constriant2(self, R, X, I, T, w, Y, G,
+                    Inj):  # R return for each asset n*2 matrix # X each asset at each period ,#G, T each period
         # w
         # y
 
@@ -210,7 +239,7 @@ class stochastic(object):
 
         # a = np.sum(np.array(X[0][0]))
 
-        cons.append(a == I)
+        cons.append(a == I + Inj)
         a = 0
         b = 0
         c = 0
@@ -219,16 +248,37 @@ class stochastic(object):
         for j in range(2 ** T - 1 - 2 ** (T - 1)):
 
             for i in range(N):
-                a += X[j][i] * np.random.uniform(R[i, 2], R[i, 0])
+                for lll in range(10000):
+                    if R[i, 0] > 0.01:
+                        ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                        if 1.3 * R[i, 1] + R[i, 0] > ss[0] > 0.0025:
+                            break
+                        else:
+                            continue
+                    else:
+                        ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                        break
+                a += X[j][i] * float(np.exp(ss[0]))  # np.random.uniform(R[i,2],R[i,0])
+
                 # a += X[0][s][i]*float(R[i,0])
                 b += X[2 * j + 1][i]
-                c += X[j][i] * np.random.uniform(R[i, 1], R[i, 2])
+                for lll in range(10000):
+                    if R[i, 0] > 0.01:
+                        kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                        if kk[0] < 0.0025:
+                            break
+                        else:
+                            continue
+                    else:
+                        kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                        break
+                c += X[j][i] * float(np.exp(kk[0]))
                 # a += X[0][s][i]*float(R[i,1])
                 d += X[2 * j + 2][i]
                 cons.append(X[j][i] >= 0)
 
-            cons.append(a == b)
-            cons.append(c == d)
+            cons.append(a + Inj == b)
+            cons.append(c + Inj == d)
 
             a = 0
             b = 0
@@ -241,9 +291,29 @@ class stochastic(object):
             l = 2 * j + 2 - (2 ** T - 1)
 
             for i in range(N):
-                a += X[j][i] * np.random.uniform(R[i, 2], R[i, 0])
+                for lll in range(10000):
+                    if R[i, 0] > 0.01:
+                        ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                        if 1.3 * R[i, 1] + R[i, 0] > ss[0] > 0.0025:
+                            break
+                        else:
+                            continue
+                    else:
+                        ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                        break
+                a += X[j][i] * float(np.exp(ss[0]))  # np.random.uniform(R[i,2],R[i,0])
 
-                c += X[j][i] * np.random.uniform(R[i, 1], R[i, 2])
+                for lll in range(10000):
+                    if R[i, 0] > 0.01:
+                        kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                        if kk[0] < 0.0025:
+                            break
+                        else:
+                            continue
+                    else:
+                        kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                        break
+                c += X[j][i] * float(np.exp(kk[0]))  # np.random.uniform(R[i,1],R[i,2])
 
                 cons.append(X[j][i] >= 0)
 
@@ -273,14 +343,14 @@ class stochastic(object):
 
         return c
 
-    def func(self, R, X, I, T, w, Y, G, q, r):
+    def func(self, R, X, I, T, w, Y, G, q, r, Inj):
         N, m = R.shape
-        step = 13
+        step = 15
         res = np.zeros((2 ** T - 1, N))
         kk = np.zeros((2 ** T - 1, N))
         a = 0
         for i in range(step):
-            cons = self.constriant2(R, X, I, T, w, Y, G)
+            cons = self.constriant2(R, X, I, T, w, Y, G, Inj)
             bbb = self.objective(w, Y, q, r, T)
             lp2 = op(bbb, cons)
             lp2.solve()
@@ -300,13 +370,9 @@ class stochastic(object):
 
     def fcs(self):
         # return all optimal strategies
-
-
         k_list = self.split_goal()
-
-        I0 = self.initial
-
-        R = self.scen()
+        I0 = self.initial - self.Inj
+        R = self.norm()
         T = self.T
         w = self.WW()
         Y = self.YY()
@@ -315,28 +381,21 @@ class stochastic(object):
         r = self.r
         m, N = R.shape
         res = []
-
         rar = np.array([])
         cur_I = I0
-
         for i in range(len(k_list)):
-
             cur_K = k_list[i]
-            cur_S, cur_I = self.func(R, X, int(cur_I), T, w, Y, cur_K, q, r)
-
+            cur_S, cur_I = self.func(R, X, int(cur_I), T, w, Y, cur_K, q, r, self.Inj)
             res.append(cur_S)
             if i == len(k_list) - 1:
                 res.append(cur_I)
-
         return res
-
 
     def c_array(self):
         a = self.index
-        #a = a.tolist()
+        a = a.tolist()
 
         return [a[i:i + 4] for i in range(0, len(a), 4)]
-
 
     def get_node(self):
         # get a list of index price
@@ -362,9 +421,6 @@ class stochastic(object):
 
         return final_lis
 
-
-
-
     def strategy(self):
         # return the optimal strategy which is a list
         # the last element of the list is the estimated wealth achieved at the end of the investment period
@@ -383,40 +439,27 @@ class stochastic(object):
         optimal_index = self.get_node()
 
         liss = []
-        # stra and optimal index should have same length
-        for i in range(len(optimal_index)):
+
+        a = min(len(stra), len(optimal_index))
+        for i in range(a):
             lis = []
             op_id = optimal_index[i]
-
             op_stra = stra[i]
-
             for j in range(len(op_id)):
                 k = op_id[j]
                 lis.append(op_stra[k])
-
             liss.append(lis)
-
-
+        liss.append(expected)
 
         return liss
 
     def weights(self):
         lis = self.strategy()
-        optimal_solution = lis[-1]
         lis.pop(-1)
         nlis = lis
+        print(len(nlis))
         for i in range(len(nlis)):
             for j in range(len(nlis[i])):
                 nlis[i][j] = nlis[i][j] / np.sum(nlis[i][j])
 
         return nlis
-
-    ############################################################################
-
-
-#a = stochastic(55, 3, stock_r, 80, 2, 1, np.array([0, 1, 2, 1, 0, 1, 2, 3, 0, 1, 2, 3]))
-# start = time.time()
-# c,k = a.func(rdr,XX,57,4,www,yyy,100,1,3)
-# print(a.mean(stock_r))
-##print(a.vio(stock_r))
-# print(a.scen())

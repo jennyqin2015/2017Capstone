@@ -10,7 +10,7 @@
     }
 
     #table_name td, #table_name th {
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
     padding: 6px;
 
     }
@@ -23,29 +23,23 @@
 
 
     <div class="mt-3">
-        <h1>Portfolio of <strong>{{ portfolio.user_email }}</strong></h1>
+        <h1><strong>Portfolio Details</strong></h1>
     </div>
     <hr>
     <div class="container">
 
+        <!--<div class="row">-->
         <div class="row">
-            <div class="col">
-                {% for i in plot_url_list %}
-                      <img src="data:image/png;base64, {{ i }}" width="500" height="500" alt="graph">
-                {% endfor %}
-            </div>
 
-            <div class="col align-self-center">
-                <div class="row">
-                    <p> Your target goal is <strong> ${{portfolio.amount}}</strong></p>
+              {% for i in plot_url_list %}
+                  <div class="col-md-6">
+                  <img src="data:image/png;base64, {{i}}" width="500" height="500" alt="graph">
+                  </div>
+              {% endfor %}
 
 
-                </div>
-                <div class="row">
-                    <p> Your initial deposit is <strong> ${{portfolio.initial_deposit}}</strong></p>
 
-
-                </div>
+            <div class="col-md-6">
                 <div class="row">
                     <p> Tickers:
                         {% for ticker in portfolio.tickers %}
@@ -56,43 +50,41 @@
 
                 </div>
                     <table id="table_name">
+
                     <tr>
-                            <th>Ticker name</th>
-                            <th>Weight Invested</th>
-                            <br>
+                            {% for j in range(portfolio.tickers|count) %}
+
+                                <th>{{portfolio.tickers[j]}}</td>
+
+
+                            {% endfor %}
                     </tr>
-                        {% for i in range(portfolio.tickers|count) %}
-                            <tr>
-                                <td>{{portfolio.tickers[i]}}</td>
-                                <td>{{'%.03f' % portfolio.weights[i]}}</td>
-                                <br>
-                            </tr>
+
+                    {% for i in start_ls %}
+                         <tr>
+                        {% for j in range(portfolio.tickers|count) %}
+
+                                <td>{{'%.03f' % weights[i+j]}}</td>
+
                         {% endfor %}
-                     </table>
+                        </tr>
+                     {% endfor %}
+
+                    </table>
 
 
                 <div class="row">
                     <p>Risk Appetite: <strong>{{ portfolio.risk_appetite }}</strong></p>
                 </div>
-                <div class="row align-items-end">
-                    <a class="btn btn-warning"
-                       href="{{ url_for('portfolios.change_risk',portfolio_id = portfolio._id) }}">Change your portfolio settings</a>
-                </div>
+
             </div>
         </div>
         <div class= "row">
 
-
-
-            <div class="col">
-                <a class="btn btn-primary" href="{{ url_for('portfolios.delete_portfolio',portfolio_id = portfolio._id) }}">Delete this portfolio</a>
-            </div>
             <div class ="col">
-                <a class="btn btn-primary" href="{{ url_for('users.user_portfolios') }}">Return to your portfolios</a>
+                <a class="btn btn-primary" href="{{ url_for('portfolios.get_portfolio_page', portfolio_id = portfolio._id) }}">Return to the home page of this portfolio</a>
             </div>
-            <div class="col">
-                <a class="btn btn-primary" href="{{ url_for('portfolios.test_portfolio',portfolio_id = portfolio._id) }}">test portfolio</a>
-            </div>
+
 
 
         </div>

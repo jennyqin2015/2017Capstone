@@ -1,0 +1,52 @@
+.topNav{
+	position: fixed;
+	top: 0;
+	width: 100vw;
+	height: 60px;
+	display: flex;
+	padding: 10px 20px;
+}
+
+.logo{
+	flex: 1 100px;
+	height: 40px;
+	line-height: 40px;
+}
+
+.buttons{
+	flex: 2 50%;
+	justify-content: flex-end;
+}
+
+.body{
+	height: calc(100vh - 60px);
+	position: relative;
+	top: 60px;
+	background: url('bg.jpg') no-repeat;
+	background-position: center bottom;
+	background-size: cover;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	text-align: center;
+}
+
+.shadowLayer{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	background: black;
+	opacity: 0.65;
+}
+
+.centerBox{
+	z-index: 2;
+}
+
+.body .centerBox p{
+	z-index: 99;
+	text-align: center;
+	color: white;
+	font-weight: 200;
+	margin-bottom: 10px;
+}

@@ -1,0 +1,61 @@
+{% extends "base.jinja2" %}
+{% block content %}
+    <head>
+    <style>
+
+    #table_name {
+
+    border-collapse: collapse;
+
+    }
+
+    #table_name td, #table_name th {
+    border: 2px solid #ddd;
+    padding: 6px;
+
+    }
+
+
+
+    </style>
+    </head>
+
+
+
+    <div class="mt-3">
+        <h1><strong>Portfolio Details</strong></h1>
+    </div>
+    <hr>
+    <div class="container">
+
+        <!--<div class="row">-->
+        <div class="row">
+
+
+                  <div class="col-md-6">
+                  <img src="data:image/png;base64, {{plot_url_list}}" width="500" height="500" alt="graph">
+                  </div>
+
+
+
+
+            <div class="col-md-6">
+
+
+                <div class="row">
+                    <p>Risk Appetite: <strong>{{ portfolio.risk_appetite }}</strong></p>
+                </div>
+
+            </div>
+        </div>
+        <div class= "row">
+
+            <div class ="col">
+                <a class="btn btn-primary" href="{{ url_for('portfolios.get_portfolio_page', portfolio_id = portfolio._id) }}">Return to the home page of this portfolio</a>
+            </div>
+
+
+
+        </div>
+    </div>
+{% endblock %}
