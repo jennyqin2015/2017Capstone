@@ -6,6 +6,7 @@ import src.models.users.decorators as user_decorators
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from io import BytesIO
 import base64
+import pandas
 
 stock_blueprint = Blueprint('stocks', __name__)
 
@@ -23,6 +24,10 @@ def stock_page(stock_ticker):   # Renders unique stock page
 @stock_blueprint.route('/stock/<string:stock_ticker>')
 def stock_page(stock_ticker):   # Renders unique portfolio page
     stock = Stock.get_by_ticker(stock_ticker)
+    prices = pandas.read_json(stock.prices)
+    rets = pandas.read_json(stock.returns)
+    print(prices)
+    print(rets)
     fig = stock.plot_stock()
     canvas = FigureCanvas(fig)
     img = BytesIO()

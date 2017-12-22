@@ -208,6 +208,32 @@ class stochastic:
 
         return liss
 
+    def slack_p(self):
+        m, N = self.stock.shape
+        lis = []
+        liss = []
+        for j in range(2 ** self.T - 1):
+            for i in range(N):
+                lis.append(variable(1, 'x'))
+
+            liss.append(lis)
+            lis = []
+
+        return liss
+
+    def slack_m(self):
+        m, N = self.stock.shape
+        lis = []
+        liss = []
+        for j in range(2 ** self.T - 1):
+            for i in range(N):
+                lis.append(variable(1, 'x'))
+
+            liss.append(lis)
+            lis = []
+
+        return liss
+
     def norm(self):
         m, N = self.stock.shape
 
@@ -244,38 +270,128 @@ class stochastic:
         b = 0
         c = 0
         d = 0
-
+        e = 0
         for j in range(2 ** T - 1 - 2 ** (T - 1)):
-
-            for i in range(N):
-                for lll in range(10000):
-                    if R[i, 0] > 0.01:
-                        ss = np.random.normal(R[i, 0], R[i, 1], 1)
-                        if 1.3 * R[i, 1] + R[i, 0] > ss[0] > 0.0025:
+            if j == 0:
+                for k in range(N):
+                    e += X[j][k]
+                for i in range(N):
+                    for lll in range(100):
+                        if R[i, 0] > 0.01:
+                            ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                            if 0.85 * R[i, 1] + R[i, 0] > ss[0]:
+                                break
+                            else:
+                                continue
+                        if R[i, 0] < 0.01:
+                            ss = np.random.normal(R[i, 0], R[i, 1], 1)
                             break
-                        else:
-                            continue
-                    else:
-                        ss = np.random.normal(R[i, 0], R[i, 1], 1)
-                        break
-                a += X[j][i] * float(np.exp(ss[0]))  # np.random.uniform(R[i,2],R[i,0])
 
-                # a += X[0][s][i]*float(R[i,0])
-                b += X[2 * j + 1][i]
-                for lll in range(10000):
-                    if R[i, 0] > 0.01:
-                        kk = np.random.normal(R[i, 0], R[i, 1], 1)
-                        if kk[0] < 0.0025:
+                    a += X[j][i] * float(np.exp(ss[0]))  # np.random.uniform(R[i,2],R[i,0])
+
+                    # a += X[0][s][i]*float(R[i,0])
+                    b += X[2 * j + 1][i]
+                    for lll in range(100):
+                        if R[i, 0] > 0.01:
+                            kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                            if kk[0] < 0 * R[i, 1] + R[i, 0]:
+                                break
+                            else:
+                                continue
+                        if R[i, 0] < 0.01:
+                            kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                            break  # np.random.normal(R[i,0], R[i,1], 1)
+                            # if kk[0]>0.025:
+                            # break
+                            # else:
+                            # continue
+
+                    c += X[j][i] * float(np.exp(kk[0]))
+                    # a += X[0][s][i]*float(R[i,1])
+                    d += X[2 * j + 2][i]
+                    cons.append(X[j][i] >= 0)
+                    cons.append(X[j][i] <= 0.4 * e)
+
+            if j == 1 or j == 2:
+                for k in range(N):
+                    e += X[j][k]
+                for i in range(N):
+                    for lll in range(100):
+                        if R[i, 0] > 0.01:
+                            ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                            if 0.85 * R[i, 1] + R[i, 0] > ss[0]:
+                                break
+                            else:
+                                continue
+                        if R[i, 0] < 0.01:
+                            ss = np.random.normal(R[i, 0], R[i, 1], 1)  # np.random.normal(R[i,0], R[i,1], 1)
                             break
-                        else:
-                            continue
-                    else:
-                        kk = np.random.normal(R[i, 0], R[i, 1], 1)
-                        break
-                c += X[j][i] * float(np.exp(kk[0]))
-                # a += X[0][s][i]*float(R[i,1])
-                d += X[2 * j + 2][i]
-                cons.append(X[j][i] >= 0)
+
+                    a += X[j][i] * float(np.exp(ss[0]))  # np.random.uniform(R[i,2],R[i,0])
+
+                    # a += X[0][s][i]*float(R[i,0])
+                    b += X[2 * j + 1][i]
+                    for lll in range(100):
+                        if R[i, 0] > 0.01:
+                            kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                            if kk[0] < 0 * R[i, 1] + R[i, 0]:
+                                break
+                            else:
+                                continue
+                        if R[i, 0] < 0.01:
+                            kk = np.random.normal(R[i, 0], R[i, 1], 1)  # np.random.normal(R[i,0], R[i,1], 1)
+                            # if kk[0]>0.025:
+                            break
+                            # break
+                            ##else:
+                            # continue
+
+                    c += X[j][i] * float(np.exp(kk[0]))
+                    # a += X[0][s][i]*float(R[i,1])
+                    d += X[2 * j + 2][i]
+                    cons.append(X[j][i] >= 0)
+                    cons.append(X[j][i] <= 0.4 * e)
+
+            if j == 3 or j == 4 or j == 5 or j == 6:
+                for k in range(N):
+                    e += X[j][k]
+                for i in range(N):
+                    for lll in range(100):
+                        if R[i, 0] > 0.01:
+                            ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                            if 0.85 * R[i, 1] + R[i, 0] > ss[0]:
+                                break
+                            else:
+                                continue
+                        if R[i, 0] < 0.01:
+                            ss = np.random.normal(R[i, 0], R[i, 1], 1)
+                            break
+                            # np.random.normal(R[i,0], R[i,1], 1)
+                            # if 0>ss[0]:
+                            # break
+                            # else:
+                            # continue
+
+                    a += X[j][i] * float(np.exp(ss[0]))  # np.random.uniform(R[i,2],R[i,0])
+
+                    # a += X[0][s][i]*float(R[i,0])
+                    b += X[2 * j + 1][i]
+                    for lll in range(100):
+                        if R[i, 0] > 0.01:
+                            kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                            if kk[0] < -0* R[i, 1] + R[i, 0]:
+                                break
+                            else:
+                                continue
+                        if R[i, 0] < 0.01:
+                            kk = np.random.normal(R[i, 0], R[i, 1], 1)
+                            break
+
+                    c += X[j][i] * float(np.exp(kk[0]))
+                    # a += X[0][s][i]*float(R[i,1])
+                    d += X[2 * j + 2][i]
+                    cons.append(X[j][i] >= 0)
+                    cons.append(X[j][i] <= 0.4 * e)
 
             cons.append(a + Inj == b)
             cons.append(c + Inj == d)
@@ -284,38 +400,45 @@ class stochastic:
             b = 0
             c = 0
             d = 0
+            e = 0
 
         for j in range(2 ** T - 1 - 2 ** (T - 1), 2 ** T - 1):
 
             k = 2 * j + 1 - (2 ** T - 1)
             l = 2 * j + 2 - (2 ** T - 1)
-
+            for kk in range(N):
+                e += X[j][kk]
             for i in range(N):
-                for lll in range(10000):
+
+                for lll in range(100):
                     if R[i, 0] > 0.01:
                         ss = np.random.normal(R[i, 0], R[i, 1], 1)
-                        if 1.3 * R[i, 1] + R[i, 0] > ss[0] > 0.0025:
+                        if 0.85 * R[i, 1] + R[i, 0] > ss[0]:
                             break
                         else:
                             continue
-                    else:
+
+                    if R[i, 0] < 0.01:
                         ss = np.random.normal(R[i, 0], R[i, 1], 1)
                         break
+
                 a += X[j][i] * float(np.exp(ss[0]))  # np.random.uniform(R[i,2],R[i,0])
 
-                for lll in range(10000):
+                for lll in range(100):
                     if R[i, 0] > 0.01:
                         kk = np.random.normal(R[i, 0], R[i, 1], 1)
-                        if kk[0] < 0.0025:
+                        if kk[0] < -0 * R[i, 1] + R[i, 0]:
                             break
                         else:
                             continue
-                    else:
+
+                    if R[i, 0] < 0.01:
                         kk = np.random.normal(R[i, 0], R[i, 1], 1)
                         break
                 c += X[j][i] * float(np.exp(kk[0]))  # np.random.uniform(R[i,1],R[i,2])
 
                 cons.append(X[j][i] >= 0)
+                cons.append(X[j][i] <= 0.4 * e)
 
             a += (-Y[k] + w[k])
             c += (-Y[l] + w[l])
@@ -329,26 +452,39 @@ class stochastic:
             d = 0
             a = 0
             c = 0
+            e = 0
 
         return cons
 
     def objective(self, w, Y, q, r, T):
         a = 0
         b = 0
-        for i in range(len(w)):
-            a += -r * w[i]
-            b += q * Y[i]
+        d = 0
 
-            c = -(a + b) * ((1 / 2) ** T)
+        m, N = self.stock.shape
+
+        # prob = [1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16]
+        # prob = [0.0024,0.0216,0.0288,0.0672,0.0336,0.0784,0.084,0.084,0.036,0.084,0.09,0.09,0.09,0.09,0.084,0.036]
+        prob = [0.03, 0.04, 0.06, 0.04, 0.04, 0.1, 0.04, 0.08, 0.04, 0.06, 0.08, 0.07, 0.06, 0.06,
+                0.09, 0.1]
+        for i in range(len(w)):
+            a += -r * w[i]* prob[i]
+            b += q * Y[i]*prob[i]
+
+        c = -(a + b)
 
         return c
 
     def func(self, R, X, I, T, w, Y, G, q, r, Inj):
         N, m = R.shape
-        step = 15
+        step = 25
         res = np.zeros((2 ** T - 1, N))
         kk = np.zeros((2 ** T - 1, N))
         a = 0
+        # prob = [0.0024,0.0216,0.0288,0.0672,0.0336,0.0784,0.084,0.084,0.036,0.084,0.09,0.09,0.09,0.09,0.084,0.036]
+        # prob = [1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16,1/16]
+        prob = [0.03, 0.04, 0.06, 0.04, 0.04, 0.1, 0.04, 0.08, 0.04, 0.06, 0.08, 0.07, 0.06, 0.06,
+                0.09, 0.1]
         for i in range(step):
             cons = self.constriant2(R, X, I, T, w, Y, G, Inj)
             bbb = self.objective(w, Y, q, r, T)
@@ -359,11 +495,11 @@ class stochastic:
                     kk[i][j] = np.array(X[i][j].value)[0][0]
 
             for i in range(2 ** T):
-                a += np.array((Y[i].value - w[i].value))[0][0]
+                a += np.array((Y[i].value - w[i].value))[0][0] * prob[i]
 
             res += kk
 
-        a = a * ((1 / 2) ** T) * (1 / step) + G
+        a = a * (1 / step) + G
 
         res = res * (1 / step)
         return [res, a]
@@ -379,6 +515,8 @@ class stochastic:
         X = self.vari()
         q = self.q
         r = self.r
+        p = self.slack_p()
+        mi = self.slack_m()
         m, N = R.shape
         res = []
         rar = np.array([])
@@ -401,7 +539,7 @@ class stochastic:
         # get a list of index price
         # return the optimal strategy index
         big_lis = self.c_array()
-        print(big_lis)
+
         final_lis = []
         for j in range(len(big_lis)):
             family_list = [0]
@@ -410,7 +548,7 @@ class stochastic:
                 cur_node = price_lis[i]
                 pre_node = price_lis[i - 1]
 
-                if cur_node > pre_node:
+                if cur_node >= pre_node * 1.04:
                     cur_node = family_list[i - 1] * 2 + 1
                 else:
                     cur_node = family_list[i - 1] * 2 + 2
@@ -457,7 +595,7 @@ class stochastic:
         lis = self.strategy()
         lis.pop(-1)
         nlis = lis
-        print(len(nlis))
+
         for i in range(len(nlis)):
             for j in range(len(nlis[i])):
                 nlis[i][j] = nlis[i][j] / np.sum(nlis[i][j])

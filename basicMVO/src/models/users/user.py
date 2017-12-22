@@ -9,11 +9,17 @@ from src.models.portfolios.portfolio import Portfolio
 
 
 class User(object):
-    def __init__(self, email, password, first_name, last_name, _id = None):
+    def __init__(self, email, password, first_name, last_name, age = None, position = None, current_asset =None, current_debt = None, number_goals = None, total_balance = None, _id = None):
         self.email = email
         self.password = password
         self.first_name = first_name
         self.last_name = last_name
+        self.age = 0 if age is None else age
+        self.position = "Unknown" if position is None else position
+        self.current_asset = 0 if current_asset is None else current_asset
+        self.current_debt = 0 if current_debt is None else current_debt
+        self.number_goals = 0 if number_goals is None else number_goals
+        self.total_balance = 0 if total_balance is None else total_balance
         self._id = uuid.uuid4().hex if _id is None else _id
 
     def __repr__(self):
@@ -62,8 +68,24 @@ class User(object):
         User(email, Utils.hash_password(password), first_name, last_name).save_to_mongo()
         return True
 
+
+    def update_profile(self, age, position, current_asset, current_debt):
+        self.age = age
+        self.position = position
+        self.current_asset = current_asset
+        self.current_debt = current_debt
+        self.save_to_mongo()
+        return
+    def update_balance(self):
+        portfolios = Portfolio.get_by_email(self.email)
+        total_balance=0
+        for i in portfolios:
+            total_balance += i.account_balance[-1]
+        self.total_balance = total_balance
+        self.save_to_mongo()
+        return
     def save_to_mongo(self):
-        Database.insert(UserConstants.COLLECTION, data=self.json())
+        Database.update(UserConstants.COLLECTION,{'email': self.email}, self.json())
 
     def json(self):      # Creates JSON representation of user instance
         return {
@@ -71,7 +93,13 @@ class User(object):
             "email": self.email,
             "password": self.password,
             "first_name": self.first_name,
-            "last_name": self.last_name
+            "last_name": self.last_name,
+            "age": self.age,
+            "position": self.position,
+            "current_asset": self.current_asset,
+            "current_debt": self.current_debt,
+            "number_goals": self.number_goals,
+            "total_balance": self.total_balance
         }
 
     @classmethod

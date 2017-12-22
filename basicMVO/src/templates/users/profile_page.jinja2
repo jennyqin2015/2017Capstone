@@ -5,14 +5,108 @@
 <head>
     <meta charset="UTF-8">
     <title>Basic MVO</title>
+    <style>
+    .col{
+      right:0
+    }
+    ul{
+    list-style: none;
+    }
 
+    </style>
     {% include "html_dependencies.html" %}
 
 </head>
 <body>
+<div class="container">
+    <div class="row justify-content-start" style="margin-top: 50px">
+        <div class="col-4">
+            <h1>{{user.first_name}}'s Account</h1>
 
-<h1> Welcome to {{user.first_name}}'s page</h1>
+        </div>
+        <div class="col align-self-center">
 
+            <a class="btn btn-primary" href = "{{url_for('users.update_profile')}}">Update your account<a>
+        </div>
+
+
+    </div>
+
+    <div class="row align-items-top">
+        <div class="col">
+            <div class="row">
+                <img src="/static/css/profile.png">
+            </div>
+            <div class="row">
+                <ul>
+                     <li>Your age: {{user.age}}</li>
+                     <li>Your current position: {{user.position}} </li>
+
+                     <li>Number of goals: {{user.number_goals}}</li>
+
+                </ul>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="row">
+            <h2 style="margin-top:20px;margin-left: 10px;">Total Account Balance in Goals: </h2><br>
+            </div>
+            <div class="row">
+            <p style="margin-left: 10px; font-size:40px;">${{user.total_balance|round(2)}}</p>
+            </div>
+            <div class="row justify-content-start">
+            <div class="col-6">
+            <h1 style="margin-left: 3px; font-size:30px;">Current Asset: ${{user.current_asset|round(2)}}</h1><br>
+            </div>
+            <div class="col-5">
+            <h1 style="margin-left: 3px;font-size:30px;color: red;">Current Debt: ${{user.current_debt|round(2)}}</h1><br>
+            </div>
+            </div>
+
+
+            <div class="row">
+                <table class="table" id="t_1">
+                    <thead>
+                        <tr>
+                            <th>Type of Goal</th>
+
+                            <th>Current time</th>
+                            <th>Start Date</th>
+
+                            <th>Terminal Date</th>
+                            <th>Initial Deposit</th>
+                            <th>Target Amount</th>
+                            <th>Last Account Balance</th>
+
+                            <th>Estimated Monthly Deposit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                            {% for i in ports %}
+                            <tr>
+                                <td>{{i.goal_type}}</td>
+                                <td>{{current_date}}</td>
+                                <td>{{i.start_time}}</td>
+                                <td>{{i.terminal_date}}</td>
+
+                                <td>${{i.initial_deposit}}</td>
+                                <td>${{i.amount}}</td>
+                                <td>${{i.account_balance[-1]|round(2)}}</td>
+                                <td>${{i.injection}}</td>
+                            </tr>
+                            {% endfor %}
+
+                    </tbody>
+                 </table>
+            </div>
+        </div>
+
+    </div>
+
+
+
+</div>
 </body>
 </html>
 {% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Smart invest</title>
+	<style>
+	.h1{
+	    color: white
+	}
+    .form-group{
+
+        font-family: Helvetica;
+        background-color:transparent;
+        font-size: 20px;
+    }
+    .col{
+        margin-top: 50px
+    }
+    </style>
+	{% include "html_dependencies.html" %}
+</head>
+<body>
+    <div class="col">
+    <div class="form-size" style="background-color:transparent; border:none;">
+        <form action="{{ url_for('users.update_profile') }}" method="post">
+            <h1 style="font-style: italic">Hi, there!</h1>
+            <div class="form-group">
+                <label for="age">How old are you?</label>
+                <input type="number" class="form-control" id="age" name='age' placeholder="34">
+            </div>
+            <div class="form-group">
+                <label for="position">What is your current job position?</label>
+                <input type="text" class="form-control" id="position" name='position' placeholder="Ex: Doctor, Student">
+            </div>
+
+            <div class="form-group">
+                <label for="current_asset">What is the current amount of money in your asset account? To clarify, could you please estimate the amount of money you have in your bank account?</label>
+                <input type="number" class="form-control" placeholder="10000" id="current_asset" name="current_asset">
+            </div>
+
+            <div class="form-group">
+                <label for="current_debt">What is the current amount of money in your debt account?</label>
+                <input type="number" class="form-control" placeholder="5000" id="current_debt" name="current_debt">
+            </div>
+
+
+            <div class="row">
+            <div class="col">
+            <button type="submit" class="btn btn-primary" style="float: right">Submit</button>
+            </div>
+            <div class="col align-self-center">
+
+            <a href="{{ url_for('users.user_profile') }}">Return to Your Profile Page</a>
+            </div>
+            </div>
+        </form>
+    </div>
+    </div>
+</body>
+</html>
+{% endblock %}
+

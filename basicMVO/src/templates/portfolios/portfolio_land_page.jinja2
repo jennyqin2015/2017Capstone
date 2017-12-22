@@ -1,83 +1,134 @@
 {% extends "base.jinja2" %}
 {% block content %}
 
+    <head>
+    <style>
+        #con_1{
+            margin-left: 15px;
+            margin-top:10px;
+            font-family: Helvetica;
+            font-size: 20px;
+            border: none;
+        }
+        #t_1{
+            margin-top: 50px;
+        }
+        #h3{
+            margin-top: 10px;
+            margin-left: 0px;
+        }
+        #con_2{
+            margin-top: 30px;
 
-
-
-    <div class="mt-3">
-        <h1><strong>Portfolio Overview</strong></h1>
-    </div>
-    <hr>
-    <div class="container">
-
-
-
-
-            <div class="row">
-                    <p> Your target goal is <strong> ${{portfolio.amount}}</strong></p>
-
+        }
+        .row{
+        margin-top: 10px;
+        }
+    </head>
+    </style>
+    <div class="container-fluid" id="con_2">
+        <div class="row justify-content-start">
+            <div class="col-7">
+                <h1><strong>Portfolio Summary</strong></h1>
             </div>
-            <div class="row">
-                    <p>    Your initial deposit is <strong> ${{portfolio.initial_deposit}}</strong></p>
 
+            <div class="col align-self-center">
+                  <a class="btn btn-primary" style="float:right;"
+                 href="{{ url_for('portfolios.update_portfolio',portfolio_id = portfolio._id) }}">Edit this portfolio</a>
             </div>
-            <div class="row">
-                    <p>    Risk Appetite: <strong>{{ portfolio.risk_appetite }}</strong></p>
-
+            <div class="col align-self-center">
+                <a class="btn btn-danger" style="float:right;" href="{{ url_for('portfolios.delete_portfolio',portfolio_id = portfolio._id) }}">Delete this portfolio</a>
             </div>
-
-
-
-        <div class="row">
-                    <p>
-                        Tickers:
-                        {% for ticker in portfolio.tickers %}
-                            <a href="{{ url_for('stocks.stock_page',stock_ticker = ticker) }}">{{ ticker }},</a>
-                        {% endfor %}
-                        <br>
-                    </p>
-
         </div>
 
+    </div>
 
-            <div class='row'>
-
-
-
-                         <p> Please Click on each quarter to find out more information about the portfolio!<br>
-
-                         </p>
+    <div class="container" id="con_1">
+            <div class="row justify-content-start fluid">
+                <h3 id="h3">Goal Description: {{portfolio.description}}
+                   </h3>
             </div>
-                         <div class="row">
+            <div class="row">
+                    <h3 >Performance Plots:
+                       </h3>
+            </div>
+            <div class="row justify-content-start">
 
-                             <p>
-                             {% for i in range(year_count) %}
-                                <div class = "col-md-3">
-                                <a href= "{{ url_for('portfolios.get_individual_portfolio', portfolio_id = portfolio._id, year_index = i)}}"> {{year_list[i]}}
-                                </a>
-                                </div>
-                             {% endfor %}
-
-
-                             </p>
-
-                         </div>
-
-
-            <div class= "row">
-                <div class="col">
-                    <a class="btn btn-primary" href="{{ url_for('portfolios.delete_portfolio',portfolio_id = portfolio._id) }}">Delete this portfolio</a>
+                <div class="col-6">
+                      <img src="data:image/png;base64, {{plot_url_list[0]}}" width="600" height="400" alt="graph">
                 </div>
-                <div class ="col">
+                <div class="col-5">
+                      <img src="data:image/png;base64, {{plot_url_list[1]}}" width="600" height="400" alt="graph">
+                </div>
+            </div>
+
+            <div class="row fluid">
+                <div class="col align-self-start">
+                     <table class="table" id="t_1">
+                        <thead>
+                            <tr>
+                                <th>Start Date</th>
+                                <th>Terminal Date</th>
+                                <th>Initial Deposit</th>
+                                <th>Target Amount</th>
+                                <th>Current Balance</th>
+                                <th>Goal Achieved</th>
+                                <th>Quarterly Deposit</th>
+                                <th>Total Years</th>
+                                <th>Tickers</th>
+                                <th>Years</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td><strong>{{portfolio.start_time}}</strong></th>
+                                <td><strong>{{portfolio.terminal_date}}</strong></td>
+                                <td>${{portfolio.initial_deposit}}</td>
+                                <td>${{portfolio.amount}}</td>
+
+                                <td>${{portfolio.account_balance[-1]|round(2)}}</td>
+                                <td>{{portfolio.goal_achieved}}</td>
+                                <td>${{portfolio.injection}}</td>
+                                <td>{{portfolio.years}}</td>
+                                <td>
+                                    <p>
+
+                                    {% for ticker in portfolio.tickers %}
+                                        <a href="{{ url_for('stocks.stock_page',stock_ticker = ticker) }}">{{ ticker }}<br></a>
+                                    {% endfor %}
+                                    <br>
+                                    </p>
+                                </td>
+                                <td>
+                                    <p>
+                                         {% for i in range(year_count) %}
+
+                                            <a href= "{{ url_for('portfolios.get_individual_portfolio', portfolio_id = portfolio._id, year_index = i)}}"> {{year_list[i]}}<br>
+                                            </a>
+
+                                         {% endfor %}
+
+
+                                     </p>
+                                </td>
+                            </tr>
+                        <tbody>
+
+                    </table>
+                </div>
+            </div>
+
+
+
+
+
+            <div class= "row justify-content-end">
+
+                <div class ="col-3">
                     <a class="btn btn-primary" href="{{ url_for('users.user_portfolios') }}">Return to your portfolios</a>
                 </div>
-                <div class="col">
-                        <a class="btn btn-warning"
-                           href="{{ url_for('portfolios.change_risk',portfolio_id = portfolio._id) }}">Change your portfolio settings</a>
-                </div>
-                <div class ="col">
-                <a class="btn btn-primary" href="{{ url_for('portfolios.get_performance_by_year', portfolio_id = portfolio._id) }}">check out the performance for this year!</a>
-                </div>
+
             </div>
 
 

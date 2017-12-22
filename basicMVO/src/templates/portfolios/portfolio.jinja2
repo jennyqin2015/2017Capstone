@@ -23,23 +23,14 @@
 
 
     <div class="mt-3">
-        <h1><strong>Portfolio Details</strong></h1>
+        <h1><strong>Quarterly Portfolio Allocation Charts</strong></h1>
     </div>
     <hr>
     <div class="container">
 
-        <!--<div class="row">-->
-        <div class="row">
 
-              {% for i in plot_url_list %}
-                  <div class="col-md-6">
-                  <img src="data:image/png;base64, {{i}}" width="500" height="500" alt="graph">
-                  </div>
-              {% endfor %}
-
-
-
-            <div class="col-md-6">
+        <div class="row justify-content-start">
+              <div class="col">
                 <div class="row">
                     <p> Tickers:
                         {% for ticker in portfolio.tickers %}
@@ -49,44 +40,30 @@
 
 
                 </div>
-                    <table id="table_name">
-
-                    <tr>
-                            {% for j in range(portfolio.tickers|count) %}
-
-                                <th>{{portfolio.tickers[j]}}</td>
-
-
-                            {% endfor %}
-                    </tr>
-
-                    {% for i in start_ls %}
-                         <tr>
-                        {% for j in range(portfolio.tickers|count) %}
-
-                                <td>{{'%.03f' % weights[i+j]}}</td>
-
-                        {% endfor %}
-                        </tr>
-                     {% endfor %}
-
-                    </table>
-
-
-                <div class="row">
-                    <p>Risk Appetite: <strong>{{ portfolio.risk_appetite }}</strong></p>
-                </div>
-
-            </div>
+              </div>
         </div>
-        <div class= "row">
+
+
+
+
+            <div class="row justify-content-start">
+                  {% for i in range(plot_url_list|count) %}
+                      <div class="col-6">
+
+                        <img src="data:image/png;base64, {{plot_url_list[i]}}" width="550" height="500" style="margin:0px" alt="graph">
+                      </div>
+                  {% endfor %}
+             </div>
+
+
+
+
+        </div>
+        <div class= "row" style="float:right">
 
             <div class ="col">
                 <a class="btn btn-primary" href="{{ url_for('portfolios.get_portfolio_page', portfolio_id = portfolio._id) }}">Return to the home page of this portfolio</a>
             </div>
-
-
-
         </div>
     </div>
 {% endblock %}

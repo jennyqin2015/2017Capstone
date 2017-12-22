@@ -1,18 +1,45 @@
-{% extends "base.jinja2" %}
-{% block content %}
-    <div class="form-size mt-4">
-        <form action="{{ url_for('users.login_user') }}" method="post">
-            <div class="form-group">
-                <label for="email">Email address</label>
-                <input type="email" class="form-control" id="email" name='email' placeholder="Enter email">
-                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.
-                </small>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name='password' placeholder="Password">
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Smart invest</title>
+	<style>
+	.form-group{
+        font-family: Helvetica;
+
+        border: none
+    }
+
+    .container{
+        margin-top: 200px;
+    }
+
+
+	</style>
+	{% include "html_dependencies.html" %}
+</head>
+<body style="background-color: #404040">
+    <div class="container" style="background-color: #404040">
+        <div class="d-flex align-items-center flex-column justify-content-center h-100 text-white" id="header">
+            <h1 class="display-4">Hello.</h1>
+            <form action="{{ url_for('users.login_user') }}" method="post">
+                <div class="form-group" >
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" name='email' placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name='password' placeholder="Password">
+                </div>
+                <div class="row justify-content-end" style="padding-right: 20px">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+            </form>
+        </div>
     </div>
-{% endblock %}
+</body>
+</html>

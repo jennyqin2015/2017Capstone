@@ -15,7 +15,7 @@ quandl.ApiConfig.api_key = StockConstants.API
 #"http://finance.google.com/finance/historical?q=NYSEARCA:SPY&startdate=Jan+01%2C+2009&enddate="+"Nov+2%2C+2017"+"&output=csv"
 
 class Stock(object):
-    def __init__(self, ticker, returns, prices, mu, std, last_updated, _id = None):
+    def __init__(self, ticker, returns, prices, mu, std, last_updated, info_url, _id = None):
         # Stock class creates stock instances of assets stored/allowed
         # Only needs to enter ticker name and run get_Params to fill in the rest.
         self.ticker = ticker
@@ -24,13 +24,14 @@ class Stock(object):
         self.mu = mu
         self.std = std
         self.last_updated = last_updated
+        self.info_url = info_url
         self._id = uuid.uuid4().hex if _id is None else _id
 
     def __repr__(self):
         return "<Asset: {}>".format(self.ticker)
 
     @classmethod
-    def get_Params(cls, ticker, url):
+    def get_Params(cls, ticker, url, info_url):
         '''
         Gets ticker data from Quandl API and saves stock to database
 
@@ -49,7 +50,7 @@ class Stock(object):
             #Please be noted that the link to retrieve S&P index data is different from the links to retrieve the price for other assets
 
             today = datetime.datetime.now()
-            url = "{0}&startdate=Jan+01%2C+2004&enddate={1}+{2}%2C+{3}&output=csv".format(url, today.strftime("%b"), today.day, today.year)
+            url = "{0}&startdate=Jan+01%2C+2007&enddate={1}+{2}%2C+{3}&output=csv".format(url, today.strftime("%b"), today.day, today.year)
             data = pd.read_csv(url)
             data.Date = pd.to_datetime(data.Date)
             last_updated = time.time()
@@ -67,7 +68,7 @@ class Stock(object):
         mu = rets.mean().values[0]*252
         std = rets.std().values[0]*np.sqrt(252)
 
-        stock = cls(ticker = ticker, returns = rets.to_json(orient='index'), prices=data.to_json(), mu = mu, std = std, last_updated = last_updated)    # create instance of stock
+        stock = cls(ticker = ticker, returns = rets.to_json(orient='index'), prices=data.to_json(), mu = mu, std = std, last_updated = last_updated, info_url=info_url)    # create instance of stock
         stock.save_to_mongo()   # save instance to db
 
         return stock
@@ -88,6 +89,8 @@ class Stock(object):
         #prices.append(pd.read_json(self.prices))
         prices = np.array(price_data.price)
         index = np.array(price_data.index)
+
+        print(type(index[0]))
         #plt.ylim(0, 80)
         #plt.plot(np.array(prices))
         #print(len(price_data.index))
@@ -97,6 +100,9 @@ class Stock(object):
 
         plt.plot(index,prices)
         plt.tick_params(index)
+        plt.title("Historical Price Chart")
+        plt.xlabel("Date")
+        plt.ylabel("Price in $")
 
         #pd.to_datetime(prices.index),
         return fig
@@ -113,6 +119,7 @@ class Stock(object):
             "mu" : self.mu,
             "std": self.std,
             "last_updated": self.last_updated,
+            "info_url": self.info_url,
             "_id": self._id
         }
 

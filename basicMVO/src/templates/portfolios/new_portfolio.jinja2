@@ -1,21 +1,56 @@
 {% extends "base.jinja2" %}
 
 {% block content %}
+    <head>
+    <style>
+    .form-group{
 
-    <div class="mt-3">
-        <h1>Thanks for creating your portfolio with us!</h1>
+        font-family: Helvetica;
+        background-color:transparent;
+        border: none;
+        font-size: 20px;
+    }
+    .form-size{
+        background-color:transparent;
+        border: none;
+        padding: 5px;
+        font-family: Helvetica;
+    }
+    #form_title{
+        margin-top: 30px;
+    }
+    </style>
+    </head>
+
+    <div class="row" id="form_title">
+        <h1>Plan ahead and be more prepared for the future!</h1>
     </div>
     <hr>
     <div class="form-size">
         <form method="post">
             <div class="form-group">
-                 <label for="goal_description">Could you please describe your goal?</label>
-                 <textarea class="form-control" id="goal_description" name="goal_description" rows="2" placeholder="Ex: This portfolio is an education fund for my kids"></textarea>
+                      <label for="start_time">1. Please input the start time for this portfolio:</label>
+                      <textarea class="form-control" rows="1" id="start_time" name="start_time" placeholder='In the format of "2014-01-01"'></textarea>
+            </div>
+            <div class="form-group">
+                 <label for="goal_description">2. Could you please describe your goal?</label>
+                 <textarea class="form-control" id="goal_description" name="goal_description" rows="2" placeholder="Ex: I want to afford my kid's intuition fee for his university."></textarea>
             </div>
 
+            <div class="form-group">
+                <label for="goal_type">3. What type of goal is this?</label>
+                    <select class="form-control" id="goal_type" name="goal_type">
+                      <option>Education Fund</option>
+                      <option>Housing Mortgage</option>
+                      <option>Retirement Fund</option>
+                      <option>Wedding Fund</option>
+                      <option>Gift Fund</option>
+                      <option>Other</option>
+                    </select>
+              </div>
 
             <div class="form-group">
-                <label for="years_to_achieve">How long do you expect to achieve this goal</label>
+                <label for="years_to_achieve">4. How long do you expect to achieve this goal?</label>
                     <select class="form-control" id="years_to_achieve" name="years_to_achieve">
                       <option>1</option>
                       <option>2</option>
@@ -27,23 +62,24 @@
                       <option>8</option>
                       <option>9</option>
                       <option>10</option>
+                      <option>11</option>
+                      <option>12</option>
+                      <option>13</option>
+                      <option>14</option>
+                      <option>15</option>
+                      <option>16</option>
+                      <option>17</option>
+                      <option>18</option>
+                      <option>19</option>
+                      <option>20</option>
                     </select>
               </div>
 
 
 
-            <div class = "form-group">
-                <label for="Amount_for_goal">How much money do you expect to withdraw by the end date of this goal?</label>
 
-                    <div class="input-group">
-
-                      <span class="input-group-addon">$</span>
-                      <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="Amount_for_goal" name="Amount_for_goal" >
-                      <span class="input-group-addon">.00</span>
-                    </div>
-            </div>
             <div class = "form-group">
-                <label for="initial_deposit">How much money could you deposit for this goal now?</label>
+                <label for="initial_deposit">5. How much money could you deposit for this goal now?</label>
 
                     <div class="input-group">
 
@@ -52,51 +88,55 @@
                       <span class="input-group-addon">.00</span>
                     </div>
             </div>
-            <div class="form-group">
-                <label for="risk_appetite">Risk Appetite:</label>
-                    <select class="form-control" id="risk_appetite" name="risk_appetite">
-                      <option>high</option>
-                      <option>medium</option>
-                      <option>low</option>
-                    </select>
+
+            <div class = "form-group">
+                <label for="Amount_for_goal">6. How much money do you expect to withdraw by the end date of this goal?</label>
+
+                    <div class="input-group">
+
+                      <span class="input-group-addon">$</span>
+                      <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="Amount_for_goal" name="Amount_for_goal" >
+                      <span class="input-group-addon">.00</span>
+                    </div>
+            </div>
+
+            <div class = "form-group">
+                <label for="injection">7. Could you deposit money to this portfolio every 3 months? If yes, could you indicate the amount of money? </label>
+
+                    <div class="input-group">
+
+                      <span class="input-group-addon">$</span>
+                      <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="injection" name="injection" >
+                      <span class="input-group-addon">.00</span>
+                    </div>
             </div>
 
 
-
             <fieldset class="form-group">
-                <label for="importance">Please indicate the importance for this goal?</label>
-                    <legend>Radio buttons</legend>
+                <label for="importance">8. How eager do you want to achieve your goal?</label>
                         <div class="form-check">
                           <label class="form-check-label">
-                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios1" value="Highly Important" checked>
-                            Highly important, I have to achieve this goal before or on the targeted end date.
+                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios1" value="3" checked>
+                            I must achieve this goal before or by the terminal date.
                           </label>
                         </div>
+
                         <div class="form-check">
-                          <label class="form-check-label">
-                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios1" value="Highly Important" checked>
-                            Highly important, I have to achieve this goal before or on the targeted end date.
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios2" value="2">
+                            I hope I could achieve this goal, but I do not mind this goal being delayed.
                           </label>
                         </div>
                         <div class="form-check">
                         <label class="form-check-label">
-                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios2" value="Important">
-                            This goal is important to me, but I can accept the delay of achieving this goal if there are other investment opportunities with higher return.
-                          </label>
-                        </div>
-                        <div class="form-check">
-                        <label class="form-check-label">
-                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios3" value="Not really important">
-                            This goal is not really important to me.
+                            <input type="radio" class="form-check-input" name="importance" id="optionsRadios3" value="1">
+                            It is acceptable for me if this goal is not achieved by the terminal date.
                           </label>
                     </div>
             </fieldset>
 
-              <div class="form-group">
-                  <label for="start_time">Please input the start time for this portfolio:</label>
-                  <textarea class="form-control" rows="5" id="start_time" name="start_time" placeholder="Ex: 2014-01-01"></textarea>
-              </div>
-            <button type="submit" class="btn btn-success">Create</button>
+
+            <button type="submit" class="btn btn-success btn-lg" style="float:right;">Create</button>
         </form>
     </div>
 {% endblock %}

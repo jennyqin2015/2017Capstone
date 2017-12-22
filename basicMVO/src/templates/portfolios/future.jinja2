@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Smart invest</title>
+	<style>
+	.form-group{
+        font-family: Helvetica;
+
+        border: none
+    }
+
+    .container{
+        margin-top: 200px;
+    }
+
+
+	</style>
+	{% include "html_dependencies.html" %}
+</head>
+<body style="background-color: #404040">
+    <div class="container" style="background-color: #404040">
+        <div class="d-flex align-items-center flex-column justify-content-center h-100 text-white" id="header">
+            <h1 class="display-4">We don't know about the future yet!</h1>
+
+            <div class="row justify-content-end" style="padding-right: 20px">
+                <a href="{{ url_for('portfolios.get_portfolio_page', portfolio_id = portfolio._id) }}" class="btn btn-success" >Return to your goal summary!</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
